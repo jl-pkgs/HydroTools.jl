@@ -1,7 +1,7 @@
 module HydroTools
 
 include("ET_models.jl")
-
+include("heat_index.jl")
 
 export cal_es, Tdew2RH, Tdew2VPD
 export cal_U2, cal_lambda, cal_slope,
