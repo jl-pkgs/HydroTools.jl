@@ -10,12 +10,9 @@ function Tem_C2F(T_degC::Real)
   T_degC .* (9 / 5) .+ 32 # T_degF
 end
 
-function heat_index(t::Union{<:Real,Missing}, rh::Union{<:Real,Missing}; missval=-9999)
-  if t == missval || rh == missval
-    return missing
-  end
+function heat_index(t::T, rh::T) where {T<:Real}
   t = Tem_C2F(t)
-  # if (ismissing(t) || ismissing(rh)); return(NaN64); end
+  
   if (t <= 40)
     hi = t
   else

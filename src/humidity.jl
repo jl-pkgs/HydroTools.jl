@@ -16,3 +16,12 @@ function Tdew2VPD(Tdew::T, Tair::T)::T where {T<:Real}
   es - ea
 end
 
+function q2ea(q, Pa=atm)
+  q * Pa/(epsilon + (1 - epsilon) * q)
+end
+
+function q2RH(q, Tair, Pa=atm)
+  ea = q2ea(q, Pa)
+  es = cal_es(Tair)
+  ea / es * 100
+end
