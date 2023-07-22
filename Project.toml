@@ -5,3 +5,15 @@ version = "0.1.0"
 
 [deps]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[weakdeps]
+PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
+
+[extensions]
+MetPyExt = "PyCall"
+
+[compat]
+julia = "1.9"
+
+[extras]
+PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"

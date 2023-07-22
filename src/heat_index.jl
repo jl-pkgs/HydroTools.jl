@@ -1,7 +1,3 @@
-"""
-    Tem_F2C(T_degF::Real)
-    Tem_C2F(T_degC::Real)
-"""
 function Tem_F2C(T_degF::Real)
   (T_degF .- 32) ./ (9 / 5)
 end
@@ -10,31 +6,32 @@ function Tem_C2F(T_degC::Real)
   T_degC .* (9 / 5) .+ 32 # T_degF
 end
 
-function heat_index(t::T, rh::T) where {T<:Real}
-  t = Tem_C2F(t)
-  
-  if (t <= 40)
-    hi = t
+function heat_index(Tair::T, RH::T) where {T<:Real}
+  Tair = Tem_C2F(Tair)
+
+  if (Tair <= 40)
+    HI = Tair
   else
-    alpha = 61 + ((t - 68) * 1.2) + (rh * 0.094)
-    hi = 0.5 * (alpha + t)
-    if (hi > 79)
-      hi = -42.379 + 2.04901523 * t + 10.14333127 * rh -
-           0.22475541 * t * rh - 6.83783 * 10^-3 * t^2 -
-           5.481717 * 10^-2 * rh^2 + 1.22874 * 10^-3 * t^2 * rh +
-           8.5282 * 10^-4 * t * rh^2 - 1.99 * 10^-6 * t^2 * rh^2
-      if (rh <= 13 && t >= 80 && t <= 112)
-        adjustment1 = (13 - rh) / 4
-        adjustment2 = sqrt((17 - abs(t - 95)) / 17)
-        total_adjustment = adjustment1 * adjustment2
-        hi = hi - total_adjustment
-      elseif (rh > 85 && t >= 80 && t <= 87)
-        adjustment1 = (rh - 85) / 10
-        adjustment2 = (87 - t) / 5
-        total_adjustment = adjustment1 * adjustment2
-        hi = hi + total_adjustment
+    alpha = 61 + ((Tair - 68) * 1.2) + (RH * 0.094)
+    HI = 0.5 * (alpha + Tair)
+    if (HI > 79)
+      HI = -42.379 + 2.04901523 * Tair + 10.14333127 * RH -
+           0.22475541 * Tair * RH - 6.83783 * 10^-3 * Tair^2 -
+           5.481717 * 10^-2 * RH^2 + 1.22874 * 10^-3 * Tair^2 * RH +
+           8.5282 * 10^-4 * Tair * RH^2 - 1.99 * 10^-6 * Tair^2 * RH^2
+      if (RH <= 13 && Tair >= 80 && Tair <= 112)
+        adj1 = (13 - RH) / 4
+        adj2 = sqrt((17 - abs(Tair - 95)) / 17)
+        tol_adj = adj1 * adj2
+        HI = HI - tol_adj
+      elseif (RH > 85 && Tair >= 80 && Tair <= 87)
+        adj1 = (RH - 85) / 10
+        adj2 = (87 - Tair) / 5
+        tol_adj = adj1 * adj2
+        HI = HI + tol_adj
       end
     end
   end
-  Tem_F2C(hi)
+  HI
+  Tem_F2C(HI)
 end

@@ -17,12 +17,30 @@ function cal_slope(Tair::T)::T where {T<:Real}
 end
 
 """
+    ET0_eq(Rn::T, Tair::T, Pa::T=atm, args...)
+
+Equilibrium evaporation, `ET0_eq = slope / (slope + gamma) * Rn`
 
 # Arguments
 - `Rn`   : net radiation (W m-2)
 - `Tair` : 2m air temperature (degC)
 - `VPD`  : vapor pressure deficit (kPa)
 - `Pa`   : surface air pressure (kPa)
+
+# Returns
+- `lambda` : latent heat of vaporization (MJ kg-1)
+- `slope`  : slope of the saturation vapor pressure curve (kPa degC-1)
+- `gamma`  : psychrometric constant (kPa degC-1)
+- `Eeq`    : equilibrium evaporation rate (mm day-1)
+
+# Optional keyword arguments
+- `args...` : additional arguments (not used in this function)
+
+# Examples
+```julia
+julia> ET0_eq(200.0, 20.0, 2.0)
+(2.456, 0.14474018811241365, 0.0013262323104019538, 6.971947723218883)
+```
 """
 function ET0_eq(Rn::T, Tair::T, Pa::T=atm, args...) where {T<:Real}
 
@@ -36,8 +54,14 @@ function ET0_eq(Rn::T, Tair::T, Pa::T=atm, args...) where {T<:Real}
   lambda, slope, gamma, Eeq
 end
 
+"""
+    ET0_Penman48(Rn::T, Tair::T, VPD::T, wind::T, Pa::T=atm; z_wind=2)
 
-# ET0_FAO98(200.0, 20.0, 2.0, 2.0)
+# Examples
+```julia
+ET0_Penman48(200., 20., 2., 2.)
+```
+"""
 function ET0_Penman48(Rn::T, Tair::T, VPD::T, wind::T, Pa::T=atm; z_wind=2) where {T<:Real}
   lambda, slope, gamma, Eeq = ET0_eq(Rn, Tair, Pa)
 
@@ -52,7 +76,14 @@ function ET0_Penman48(Rn::T, Tair::T, VPD::T, wind::T, Pa::T=atm; z_wind=2) wher
 end
 
 
-# ET0_Penman48(200., 20., 2., 2.)
+"""
+    ET0_FAO98(Rn::T, Tair::T, VPD::T, wind::T, Pa::T=atm; z_wind=2, tall_crop=false)
+
+# Examples
+```julia
+ET0_FAO98(200.0, 20.0, 2.0, 2.0)
+```
+"""
 function ET0_FAO98(Rn::T, Tair::T, VPD::T, wind::T, Pa::T=atm; z_wind=2, tall_crop=false) where {T<:Real}
   U2 = cal_U2(wind, z_wind)
   
