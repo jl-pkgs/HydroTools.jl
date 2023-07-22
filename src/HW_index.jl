@@ -27,9 +27,9 @@ julia> HW_index([-1, -1])
 
 # References
 1. Kong, D., Gu, X., Li, J., Ren, G., & Liu, J. (2020). Contributions of Global
-Warming and Urbanization to the Intensification of Human‐Perceived Heatwaves
-Over China. Journal of Geophysical Research: Atmospheres, 125(18).
-https://doi.org/10.1029/2019JD032175
+   Warming and Urbanization to the Intensification of Human‐Perceived Heatwaves
+   Over China. Journal of Geophysical Research: Atmospheres, 125(18).
+   <https://doi.org/10.1029/2019JD032175>
 """
 function HW_index(anorm::AbstractVector; p_left = 0.99) 
   lgl = anorm .>= 0
