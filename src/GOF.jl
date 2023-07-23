@@ -77,7 +77,6 @@ function GOF(obs::AbstractVector{T}, sim::AbstractVector{T}) where {T<:Real}
   RMSE = sqrt(sum(e .^ 2) / n)
   MAE = mean(abs.(e))
 
-
   if length(sim) <= 2 
     return (; KGE=-999.0, NSE=-999.0, R2=NaN, R=NaN, RMSE, MAE, bias, bias_perc, n_valid)
   end

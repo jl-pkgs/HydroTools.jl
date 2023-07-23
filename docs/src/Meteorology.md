@@ -1,0 +1,3 @@
+```@docs
+heat_index
+```

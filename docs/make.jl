@@ -15,6 +15,7 @@ makedocs(
   ),
   pages=[
     "Introduction" => "index.md",
+    "Meteorology" => "Meteorology.md",
     "Hydrology" => "Hydrology.md",
     "Potential Evapotranspiration models" => "PET.md",
     "Extreme Climate indexes" => "ExtremeClimate.md"
