@@ -1,9 +1,14 @@
 module HydroTools
 
+using Dates
+
 include("ET_models.jl")
 include("heat_index.jl")
 include("HW_index.jl")
 include("detect_events.jl")
+
+include("Radiation.jl")
+include("GOF.jl")
 
 
 export cal_es, Tdew2RH, Tdew2VPD
