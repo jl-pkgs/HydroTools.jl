@@ -15,6 +15,7 @@ makedocs(
   ),
   pages=[
     "Introduction" => "index.md",
+    "Hydrology" => "Hydrology.md",
     "Potential Evapotranspiration models" => "PET.md",
     "Extreme Climate indexes" => "ExtremeClimate.md"
   ],
@@ -27,5 +28,5 @@ makedocs(
 # Logging.disable_logging(Logging.BelowMinLevel)
 
 deploydocs(
-  repo="github.com/CUG-hydro/HydroTools.jl.git",
+  repo="github.com/CUG-hydro/HydroTools.jl.git", 
 )

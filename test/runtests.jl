@@ -13,3 +13,4 @@ using HydroTools
   @test res.FAR ≈ 0.9888888888888889
 end
 
+include("test-sceua.jl")
