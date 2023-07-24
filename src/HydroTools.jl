@@ -10,6 +10,7 @@ include("detect_events.jl")
 include("Radiation.jl")
 include("GOF.jl")
 include("optim/optim.jl")
+include("Climate/ClimateIndex.jl")
 
 export cal_es, Tdew2RH, Tdew2VPD
 export cal_U2, cal_lambda, cal_slope,

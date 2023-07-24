@@ -24,3 +24,5 @@ src/SPEI
 *tampa*
 *.pdf
 *.exe
+
+*debug*
