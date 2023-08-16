@@ -1,5 +1,6 @@
 """
     HW_index(anorm::AbstractVector; p_left = 0.99)
+    HW_index(anorm::AbstractVector, dates; p_left=0.99)
 
 Compute the HW index for a given anomaly vector `anorm`.
 
@@ -55,5 +56,17 @@ function HW_index(anorm::AbstractVector; p_left = 0.99)
   (; duration, frequency, intensity, volume, PR, FAR)
 end
 
+
+
+function HW_index(anorm::AbstractVector, dates; p_left=0.99)
+  years = year.(dates)
+  grps = unique(years)
+
+  map(year -> begin
+      inds = years .== year
+      data = @view anorm[inds]
+      (; year, HW_index(data; p_left)...)
+  end, grps)
+end
 
 export HW_index;
