@@ -3,6 +3,7 @@ module HydroTools
 using Dates
 using Dates: year
 
+include("unit_convert.jl")
 include("ET_models.jl")
 include("heat_index.jl")
 include("HW_index.jl")

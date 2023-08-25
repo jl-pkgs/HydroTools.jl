@@ -1,11 +1,3 @@
-function Tem_F2C(T_degF::Real)
-  (T_degF .- 32) ./ (9 / 5)
-end
-
-function Tem_C2F(T_degC::Real)
-  T_degC .* (9 / 5) .+ 32 # T_degF
-end
-
 """
     heat_index(Tair::T, RH::T) where {T<:Real}
 
@@ -25,7 +17,7 @@ julia> heat_index(30, 50)
 ```
 """
 function heat_index(Tair::T, RH::T) where {T<:Real}
-  Tair = Tem_C2F(Tair)
+  Tair = C2F(Tair) # Fdeg
 
   if (Tair <= 40)
     HI = Tair
@@ -50,5 +42,5 @@ function heat_index(Tair::T, RH::T) where {T<:Real}
       end
     end
   end
-  Tem_F2C(HI)
+  F2C(HI) # Cdeg
 end
