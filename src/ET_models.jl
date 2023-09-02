@@ -42,8 +42,8 @@ julia> ET0_eq(200.0, 20.0, 2.0)
 (2.456, 0.14474018811241365, 0.0013262323104019538, 6.971947723218883)
 ```
 """
-function ET0_eq(Rn::T, Tair::T, Pa::T=atm, args...) where {T<:Real}
-
+function ET0_eq(Rn::Real, Tair::Real, Pa::Real=atm, args...)
+  T = eltype(Rn)
   lambda::T = cal_lambda(Tair) # MJ kg-1
   slope::T = cal_slope(Tair) # kPa degC-1
   gamma::T = Cp * Pa / (epsilon * lambda) # kPa degC-1
@@ -62,7 +62,8 @@ end
 ET0_Penman48(200., 20., 2., 2.)
 ```
 """
-function ET0_Penman48(Rn::T, Tair::T, VPD::T, wind::T, Pa::T=atm; z_wind=2) where {T<:Real}
+function ET0_Penman48(Rn::Real, Tair::Real, VPD::Real, wind::Real, Pa::Real=atm; z_wind=2)
+  T = eltype(Rn)
   lambda, slope, gamma, Eeq = ET0_eq(Rn, Tair, Pa)
 
   U2::T = cal_U2(wind, z_wind)
@@ -85,7 +86,8 @@ ET0_Penman48(200., 20., 2., 2.)
 ET0_FAO98(200.0, 20.0, 2.0, 2.0)
 ```
 """
-function ET0_FAO98(Rn::T, Tair::T, VPD::T, wind::T, Pa::T=atm; z_wind=2, tall_crop=false) where {T<:Real}
+function ET0_FAO98(Rn::Real, Tair::Real, VPD::Real, wind::Real, Pa::Real=atm; z_wind=2, tall_crop=false)
+  T = eltype(Rn)
   U2 = cal_U2(wind, z_wind)
   
   if tall_crop
