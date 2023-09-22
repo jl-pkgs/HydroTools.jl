@@ -1,15 +1,20 @@
 module HydroTools
 
+using Unitful
 using Dates
 using Dates: year
 
+include("cal_sun_angle.jl")
+include("cal_radiation.jl")
+include("cal_humidity.jl")
+include("ET_helper.jl")
+include("ET0_models.jl")
+
 include("unit_convert.jl")
-include("ET_models.jl")
 include("heat_index.jl")
 include("HW_index.jl")
 include("detect_events.jl")
 
-include("Radiation.jl")
 include("GOF.jl")
 include("optim/optim.jl")
 include("Climate/ClimateIndex.jl")

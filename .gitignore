@@ -26,3 +26,5 @@ src/SPEI
 *.exe
 
 *debug*
+streamlit
+# .vscode

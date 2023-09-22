@@ -1,6 +1,7 @@
 deg2rad(x) = x / 180 * pi
 rad2deg(x) = x / pi * 180
 
+
 function get_md(J)
   date_origin = DateTime(2010, 1, 1, 0, 0, 0) + Day(J - 1)
   Dates.format(date_origin, "mm-dd")
@@ -18,10 +19,16 @@ function ssh2time(ssh)
 end
 
 
-# -黄赤交角 : σ
-# -纬度: ϕ
-# -时角: ω
-# Solar Declination Angle （黄赤交角）
+"""
+    get_σ(J; to_deg=false)
+
+
+- `黄赤交角` : σ, Solar Declination Angle
+
+- `纬度`: ϕ
+
+- `时角`: ω
+"""
 function get_σ(J; to_deg=false)
   σ = 0.409 .* sin.(2 * pi / 365 * J .- 1.39) # in [rad]
   if to_deg

@@ -42,3 +42,7 @@ Rd = R / Md * 1000.
 
 Cp = 1.013 * 1e-3 # MJ kg-1 degC-1
 
+
+Stefan = 4.903e-9 * u"MJ / (K^4 * m^2 *d)" # Stefan-Boltzmann constant
+
+export atm, Stefan
