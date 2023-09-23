@@ -10,13 +10,18 @@
 - `U2`   : m/s
 - `LAI`  : m2 m-2
 
+# Examples
+```julia
+
+```
+
 # References
 1. 
 """
-function PMLV2(Prcp::T, Tavg, Rs, Rn, VPD, U2, LAI,
+function PMLV2(Tavg::T, Rs::T, Rn::T, VPD::T, U2::T, LAI::T,
   Pa=atm, Ca=380.0; par) where {T<:Real}
 
-  @unpack S_sls, kQ = par
+  @unpack D0, S_sls, kQ = par
   # D0 = 0.7
   # kQ = 0.6
   # kA = 0.7 # extinction coefficient
@@ -24,10 +29,11 @@ function PMLV2(Prcp::T, Tavg, Rs, Rn, VPD, U2, LAI,
   PAR_mol = PAR * 4.57 # 1 W m-2 = 4.57 umol m-2 s-1
 
   λ, slope, gamma, Eeq = ET0_eq(Rn, Tair, Pa)
-  ϵ = slope/gamma
+  ϵ = slope / gamma
 
   ### CARBON MODULE: PHOTOSYNTHESIS --------------------------------------------
-  Am = par.Am_25 * fT2(Tavg)
+  Vm = par.Am_25 * T_adjust_Vm25(Tavg)
+  Am = Vm # 认为最大光合速率 = 最大羧化能力
 
   P1 = Am * par.Alpha * par.Thelta * PAR_mol
   P2 = Am * par.Alpha * PAR_mol
@@ -42,13 +48,13 @@ function PMLV2(Prcp::T, Tavg, Rs, Rn, VPD, U2, LAI,
 
   GPP = Ag * 86400 / 10^6 * 12 # [umol m-2 s-1] to [g C m-2 d-1]
 
-  f_VPD_gc = 1 / (1 + VPD / D0) # Leuning f_vpd
+  f_VPD_gc = 1.0 / (1.0 + VPD / D0) # Leuning f_vpd
   Gc = par.m * Ag / Ca * f_VPD_gc * 1.6 # g_water  = 1.6 * g_CO2 (mol m-2 s-1)
-  
+
   ## Convert from mol m-2 s-1 to m s-1
   Gc = Gc * 1e-2 / (0.446 * (273 / (273 + Tavg)) * (Pa / 101.3)) # unit convert to m s-1
   Gc = max(Gc, 1e-6)
-  
+
   ### WATER MODULE: ------------------------------------------------------------
   Ga = aerodynamic_conductance(U2, par.hc) # Leuning, 2008, Eq.13, doi:10.1029/2007WR006562
 
@@ -66,10 +72,12 @@ function PMLV2(Prcp::T, Tavg, Rs, Rn, VPD, U2, LAI,
 
   ## 5. Intercepted Evaporation (Ei)
   Ei = cal_Ei_Dijk2021(Prcp, LAI, par)
-  Pi = Prcp - Ei
 
+  ## TODO: 补充水体蒸发和冰面蒸发的计算
+
+  # Pi = Prcp - Ei
   Es_eq = Eeq * Tou # Soil evaporation at equilibrium, mm d-1
-  GPP, Ec, Ei, Ecr, Eca, Ga, Gc, Pi, Es_eq
+  GPP, Ec, Ei, Ecr, Eca, Ga, Gc, Es_eq
 end
 
 
@@ -118,9 +126,9 @@ end
 
 
 # 最大羧化能力温度调节函数
-# V_m = Vm_25 * fT2
-# `T` in -100:100, `fT2` always < 0.92
-function fT2(Tavg::T)::T where {T<:Real}
+# V_m = Vm_25 * T_adjust_Vm25
+# `T` in -100:100, `T_adjust_Vm25` always < 0.92
+function T_adjust_Vm25(Tavg::T)::T where {T<:Real}
   a = 0.031
   b = 0.115
   exp(a * (Tavg - 25.0)) / (1.0 + exp(b * (Tavg - 41.0))) # Gan2018, Eq. A5
@@ -139,4 +147,4 @@ function f_VPD_Zhang2019(VPD::T, par)::T where {T<:Real}
 end
 
 
-export fT2, f_VPD_Zhang2019
+export PMLV2, T_adjust_Vm25, f_VPD_Zhang2019
