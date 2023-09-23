@@ -20,7 +20,7 @@ Mw = 18.01528
 Md = 28.9634
 
 #' @rdname Mw
-epsilon = Mw / Md
+ϵ = Mw / Md
 
 #' Specific gas constants
 #' 
@@ -41,8 +41,9 @@ Rw = R / Mw * 1000. # J/(kg K)
 Rd = R / Md * 1000.
 
 Cp = 1.013 * 1e-3 # MJ kg-1 degC-1
-
+# Cp = 1.0164,  // 4.2 * 0.242, specific heat at constant pressure, 1.013  [J g-1 0C-1]
 
 Stefan = 4.903e-9 * u"MJ / (K^4 * m^2 *d)" # Stefan-Boltzmann constant
+
 
 export atm, Stefan

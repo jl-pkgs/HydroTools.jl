@@ -32,8 +32,12 @@ function Tdew2VPD(Tdew::T, Tair::T)::T where {T<:Real}
   max(es - ea, 0.0)
 end
 
+function ea2q(ea, Pa=atm)
+  ϵ * ea / (Pa - (1 - ϵ) * ea)
+end
+
 function q2ea(q, Pa=atm)
-  q * Pa/(epsilon + (1 - epsilon) * q)
+  q * Pa/(ϵ + (1 - ϵ) * q)
 end
 
 function q2RH(q, Tair, Pa=atm)

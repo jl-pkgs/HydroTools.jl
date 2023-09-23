@@ -32,8 +32,8 @@ function ET0_eq(Rn::Real, Tair::Real, Pa::Real=atm, args...)
   T = eltype(Rn)
   lambda::T = cal_lambda(Tair) # MJ kg-1
   slope::T = cal_slope(Tair) # kPa degC-1
-  gamma::T = Cp * Pa / (epsilon * lambda) # kPa degC-1
-
+  gamma::T = Cp * Pa / (ϵ * lambda) # kPa degC-1
+  
   coef_W2mm::T = 0.086400 / lambda
   Eeq::T = slope / (slope + gamma) * Rn * coef_W2mm
 
