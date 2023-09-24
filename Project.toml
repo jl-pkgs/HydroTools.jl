@@ -12,12 +12,13 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
-[weakdeps]
-PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
-
 [compat]
+LabelledArrays = "1.14"
 Statistics = "1.8, 1.9"
 julia = "1.9"
 
 [extras]
+PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
+
+[weakdeps]
 PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
