@@ -1,3 +1,4 @@
+# 一个站点的计算
 function PMLV2(Prcp::Vector{T}, Tavg::Vector{T},
   Rs::Vector{T}, Rn::Vector{T},
   VPD::Vector{T}, U2::Vector{T}, LAI::Vector{T},
@@ -13,7 +14,7 @@ function PMLV2(Prcp::Vector{T}, Tavg::Vector{T},
     r = PMLV2(Prcp[t], Tavg[t], Rs[t], Rn[t], VPD[t], U2[t], LAI[t], Pa[t], Ca; par)
     res[t, fields] = r
   end
-  
+
   fval_soil = movmean2(Prcp, frame, 0) ./ movmean2(res.Es_eq, frame, 0)
   clamp!(fval_soil, 0, 1)
 
@@ -22,10 +23,4 @@ function PMLV2(Prcp::Vector{T}, Tavg::Vector{T},
   res
 end
 
-# if option == 1
-#   res.GPP[t], res.Ec[t], res.Ecr[t], res.Eca[t],
-#   res.Ei[t], res.Pi[t], res.Es_eq[t], res.Eeq[t], res.ET_water[t],
-#   res.Ga[t], res.Gc_w[t] =
-#     PMLV2(Prcp[t], Tavg[t], Rs[t], Rn[t], VPD[t], U2[t], LAI[t], Pa[t], Ca; par)
-# elseif option == 2
-# end
+# 相同植被类型多个站点一起的计算

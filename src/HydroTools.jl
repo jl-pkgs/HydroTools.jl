@@ -9,8 +9,6 @@ include("cal_sun_angle.jl")
 include("cal_radiation.jl")
 include("cal_humidity.jl")
 
-include("Param/Param.jl")
-
 include("ET0_helper.jl")
 include("ET0_models.jl")
 
@@ -22,7 +20,7 @@ include("HW_index.jl")
 include("detect_events.jl")
 
 include("GOF.jl")
-include("optim/optim.jl")
+include("Optim/Optim.jl")
 include("Climate/ClimateIndex.jl")
 
 export cal_es, Tdew2RH, Tdew2VPD
