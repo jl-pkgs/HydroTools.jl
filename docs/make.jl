@@ -21,7 +21,7 @@ makedocs(
     "Extreme Climate indexes" => "ExtremeClimate.md"
   ],
   sitename="HydroTools.jl",
-  strict=false,
+  warnonly=true,
   clean=false,
 )
 

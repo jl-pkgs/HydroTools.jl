@@ -50,4 +50,5 @@ end
 end
 
 
+include("test-PMLV2.jl")
 include("test-sceua.jl")

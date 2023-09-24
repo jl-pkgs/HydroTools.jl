@@ -1,11 +1,11 @@
-include("constant.jl")
+# include("constant.jl")
 # include("humidity.jl")
 
 
 """
     ET0_eq(Rn::T, Tair::T, Pa::T=atm, args...)
 
-Equilibrium evaporation, `ET0_eq = slope / (slope + gamma) * Rn`
+Equilibrium evaporation, `ET0_eq = Δ / (Δ + γ) * Rn`
 
 # Arguments
 - `Rn`   : net radiation (W m-2)
@@ -14,9 +14,9 @@ Equilibrium evaporation, `ET0_eq = slope / (slope + gamma) * Rn`
 - `Pa`   : surface air pressure (kPa)
 
 # Returns
-- `lambda` : latent heat of vaporization (MJ kg-1)
-- `slope`  : slope of the saturation vapor pressure curve (kPa degC-1)
-- `gamma`  : psychrometric constant (kPa degC-1)
+- `λ` : latent heat of vaporization (MJ kg-1)
+- `Δ`  : slope of the saturation vapor pressure curve (kPa degC-1)
+- `γ`  : psychrometric constant (kPa degC-1)
 - `Eeq`    : equilibrium evaporation rate (mm day-1)
 
 # Optional keyword arguments
@@ -28,16 +28,16 @@ julia> ET0_eq(200.0, 20.0, 2.0)
 (2.456, 0.14474018811241365, 0.0013262323104019538, 6.971947723218883)
 ```
 """
-function ET0_eq(Rn::Real, Tair::Real, Pa::Real=atm, args...)
-  T = eltype(Rn)
-  lambda::T = cal_lambda(Tair) # MJ kg-1
-  slope::T = cal_slope(Tair) # kPa degC-1
-  gamma::T = Cp * Pa / (ϵ * lambda) # kPa degC-1
-  
-  coef_W2mm::T = 0.086400 / lambda
-  Eeq::T = slope / (slope + gamma) * Rn * coef_W2mm
+function ET0_eq(Rn::T, Tair::T, Pa::T=atm, args...) where {T<:Real}
+  # T = eltype(Rn)
+  λ::T = cal_lambda(Tair) # MJ kg-1
+  Δ::T = cal_slope(Tair) # kPa degC-1
+  γ::T = Cp * Pa / (ϵ * λ) # kPa degC-1
 
-  lambda, slope, gamma, Eeq
+  coef_W2mm::T = 0.086400 / λ
+  Eeq::T = Δ / (Δ + γ) * Rn * coef_W2mm
+
+  λ, Δ, γ, Eeq
 end
 
 """
@@ -45,19 +45,19 @@ end
 
 # Examples
 ```julia
+# ET_water = ET0_Penman48(Rn, Tavg, VPD, U2, Pa)
 ET0_Penman48(200., 20., 2., 2.)
 ```
 """
-function ET0_Penman48(Rn::Real, Tair::Real, VPD::Real, wind::Real, Pa::Real=atm; z_wind=2)
-  T = eltype(Rn)
-  lambda, slope, gamma, Eeq = ET0_eq(Rn, Tair, Pa)
-
+function ET0_Penman48(Rn::T, Tair::T, VPD::T, wind::T, Pa::T=atm; z_wind=2) where {T<:Real}
+  # T = eltype(Rn)
+  λ, Δ, γ, Eeq = ET0_eq(Rn, Tair, Pa)
   U2::T = cal_U2(wind, z_wind)
   # rho_a * Cp * dT / rH (MJ m-2 s-1)
   # rho_a ≈ 1.225 kg/m3
   # rho_a * Cp / rH = f(U2)
   # `f(U2) = 2.6 * (1 + 0.54U2)` is equivalent to Shuttleworth1993
-  Evp::T = gamma / (slope + gamma) * 6.43 * (1 + 0.536 * U2) * VPD / lambda
+  Evp::T = γ / (Δ + γ) * 6.43 * (1 + 0.536 * U2) * VPD / λ
   PET::T = Eeq + Evp
   PET
 end
@@ -72,10 +72,10 @@ ET0_Penman48(200., 20., 2., 2.)
 ET0_FAO98(200.0, 20.0, 2.0, 2.0)
 ```
 """
-function ET0_FAO98(Rn::Real, Tair::Real, VPD::Real, wind::Real, Pa::Real=atm; z_wind=2, tall_crop=false)
-  T = eltype(Rn)
+function ET0_FAO98(Rn::T, Tair::T, VPD::T, wind::T, Pa::T=atm; z_wind=2, tall_crop=false) where {T<:Real}
+  # T = eltype(Rn)
   U2 = cal_U2(wind, z_wind)
-  
+
   if tall_crop
     p1 = T(1600.0)
     p2 = T(0.38)
@@ -84,11 +84,11 @@ function ET0_FAO98(Rn::Real, Tair::Real, VPD::Real, wind::Real, Pa::Real=atm; z_
     p2 = T(0.34)
   end
 
-  lambda, slope, gamma, Eeq = ET0_eq(Rn, Tair, Pa)
-  coef_W2mm::T = 0.086400 / lambda
+  λ, Δ, γ, Eeq = ET0_eq(Rn, Tair, Pa)
+  coef_W2mm::T = 0.086400 / λ
 
-  Eeq::T = slope / (slope + (gamma * (1.0 + p2 * U2))) * Rn * coef_W2mm
-  Evp::T = gamma * p1 / (Tair + 273.15) * U2 * VPD / (slope + (gamma * (1.0 + p2 * U2)))
+  Eeq::T = Δ / (Δ + (γ * (1.0 + p2 * U2))) * Rn * coef_W2mm
+  Evp::T = γ * p1 / (Tair + 273.15) * U2 * VPD / (Δ + (γ * (1.0 + p2 * U2)))
 
   PET::T = Eeq + Evp
   PET
