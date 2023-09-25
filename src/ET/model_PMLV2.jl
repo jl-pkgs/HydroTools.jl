@@ -43,7 +43,7 @@ function PMLV2(Prcp::T, Tavg::T, Rs::T, Rn::T, VPD::T, U2::T, LAI::T,
   # Transpiration from plant cause by aerodynamic water transfer
   ρ_a = cal_rho_a(Tavg, Pa)
   # ρ_a = cal_rho_a(Tavg, q, Pa)
-  LEca = (ρ_a * Cp * 1e6 * r.Ga * VPD / γ) / (ϵ + 1 + r.Ga / r.Gc_w) # W m-2
+  LEca = (ρ_a * Cp * 1e6 * r.Ga * VPD / γ) / (ϵ + 1 + r.Ga / r.Gc_w) # W m-2, `Cp*1e6`: [J kg-1 °C-1]
 
   r.Ecr = W2mm(LEcr, λ) # [W m-2] change to [mm d-1]
   r.Eca = W2mm(LEca, λ) # [W m-2] change to [mm d-1]
