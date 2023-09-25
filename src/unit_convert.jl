@@ -25,11 +25,27 @@ MJ2mm(x::Real) = x / 2.45
 
 W2MJ(x::Real) = x / 1e6 * 86400
 
-function W2mm(x::Real; Tair=0)
-  # Cp = 4.2 * 0.242  # specific heat at constant pressure, 1.013 [kJ kg⁻¹ °C⁻¹]
+function W2mm(x::Real, Tair=0)
   lamada = 2500 - 2.2 * Tair
   return x / lamada * 86400 * 1e-3  # W M⁻² to mm
 end
+
+# lambda: [MJ kg-1]
+W2mm(Ra; lambda) = Ra * 86400 / 1e6 / lambda
+
+
+"""
+    mol2m(Tavg, Pa=atm)
+    mol2m_rong2018(Tavg, Pa=atm)
+
+Convert from mol m-2 s-1 to m s-1, g = g_m * mol2m(Tavg)
+
+# Reference
+1. Monteith, 2013, Principles of Environmental Physics, Eq. 3.14
+"""
+mol2m(Tavg, Pa=atm) = R * (Tavg + K0) / Pa / 1000
+
+mol2m_rong2018(Tavg, Pa=atm) = 1e-2 / (0.446 * (273 / (273 + Tavg)) * (Pa / 101.3))
 
 
 F2C(T_degF::Real) = (T_degF - 32.0) / (9.0 / 5.0)

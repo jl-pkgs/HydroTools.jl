@@ -1,8 +1,8 @@
 using Parameters
 
 
-
 @with_kw mutable struct interm_PML{T}
+  ET::T = T(0)
   GPP::T = T(0)
   Ec::T = T(0)
   Ecr::T = T(0)
@@ -17,12 +17,13 @@ using Parameters
   Ga::T = T(0)
   Gc_w::T = T(0)
 
+  fval_soil::T = T(0)
   Es::T = T(0)
-  ET::T = T(0)
 end
 
 @with_kw mutable struct output_PML{T}
   n::Integer
+  ET::Vector{T} = zeros(T, n)
   GPP::Vector{T} = zeros(T, n)
   Ec::Vector{T} = zeros(T, n)
   Ecr::Vector{T} = zeros(T, n)
@@ -37,8 +38,8 @@ end
   Ga::Vector{T} = zeros(T, n)
   Gc_w::Vector{T} = zeros(T, n)
 
+  fval_soil::Vector{T} = zeros(T, n)
   Es::Vector{T} = zeros(T, n)
-  ET::Vector{T} = zeros(T, n)
 end
 # output_PML(;n::Integer) = output_PML{Float64}(;n=n)
 
@@ -67,7 +68,7 @@ end
 ## DATATYPE CONVERSION ---------------------------------------------------------
 
 function to_mat(res::output_PML{T}) where {T<:Real}
-  names = fieldnames(interm_PML)[2:end] |> collect
+  names = fieldnames(output_PML)[2:end] |> collect
   data = map(i -> getfield(res, i), names)
   data = cat(data..., dims=2)
   data, names

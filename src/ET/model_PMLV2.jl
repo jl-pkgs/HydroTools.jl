@@ -45,8 +45,8 @@ function PMLV2(Prcp::T, Tavg::T, Rs::T, Rn::T, VPD::T, U2::T, LAI::T,
   # ρ_a = cal_rho_a(Tavg, q, Pa)
   LEca = (ρ_a * Cp * 1e6 * r.Ga * VPD / γ) / (ϵ + 1 + r.Ga / r.Gc_w) # W m-2, `Cp*1e6`: [J kg-1 °C-1]
 
-  r.Ecr = W2mm(LEcr, λ) # [W m-2] change to [mm d-1]
-  r.Eca = W2mm(LEca, λ) # [W m-2] change to [mm d-1]
+  r.Ecr = W2mm(LEcr; lambda=λ) # [W m-2] change to [mm d-1]
+  r.Eca = W2mm(LEca; lambda=λ) # [W m-2] change to [mm d-1]
   r.Ec = r.Ecr + r.Eca
 
   ## 5. Intercepted Evaporation (Ei)

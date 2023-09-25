@@ -23,6 +23,17 @@ function movmean2(y::AbstractVector{T}, win_left::Integer, win_right::Integer=wi
 end
 
 
+function nanmean2(x, y)
+  if isnan(x)
+    y
+  elseif isnan(y)
+    x
+  else
+    (x + y) / 2.0
+  end
+end
+
+
 function replace_miss(x::AbstractVector, miss=NaN)
   x[ismissing.(x)] .= miss
   x
@@ -48,4 +59,4 @@ end
 
 
 export struct2vec, struct2tuple
-export getDataType, replace_miss
+export movmean2, nanmean2, getDataType, replace_miss

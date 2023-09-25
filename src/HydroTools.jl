@@ -3,6 +3,10 @@ module HydroTools
 using Dates
 using Dates: year
 
+
+include("GOF.jl")
+include("Optim/Optim.jl")
+
 include("constant.jl")
 
 include("cal_sun_angle.jl")
@@ -18,9 +22,6 @@ include("unit_convert.jl")
 include("heat_index.jl")
 include("HW_index.jl")
 include("detect_events.jl")
-
-include("GOF.jl")
-include("Optim/Optim.jl")
 include("Climate/ClimateIndex.jl")
 
 export cal_es, Tdew2RH, Tdew2VPD

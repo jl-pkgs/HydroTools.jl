@@ -28,5 +28,6 @@ src/SPEI
 *debug*
 streamlit
 # .vscode
-*.qmd
+# *.qmd
 *.csv
+*.vdoc.jl

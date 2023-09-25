@@ -74,22 +74,4 @@ function aerodynamic_conductance(U2::T, hc::T; Zob = 15.0) where {T<:Real}
 end
 
 
-
-W2mm(Ra, lambda) = Ra * 86400 / 1e6 / lambda
-
-
-"""
-    mol2m(Tavg, Pa=atm)
-    mol2m_rong2018(Tavg, Pa=atm)
-
-Convert from mol m-2 s-1 to m s-1, g = g_m * mol2m(Tavg)
-
-# Reference
-1. Monteith, 2013, Principles of Environmental Physics, Eq. 3.14
-"""
-mol2m(Tavg, Pa=atm) = R * (Tavg + K0) / Pa / 1000
-
-mol2m_rong2018(Tavg, Pa=atm) = 1e-2 / (0.446 * (273 / (273 + Tavg)) * (Pa / 101.3))
-
-
 export cal_Uz, cal_U2, cal_lambda, cal_slope, mol2m

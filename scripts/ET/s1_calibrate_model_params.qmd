@@ -1,0 +1,111 @@
+```{julia}
+using Ipaper
+using RTableTools
+using Test
+using HydroTools
+using HydroTools: list
+using DataFrames
+using BenchmarkTools
+
+
+function replace_miss!(df::AbstractDataFrame, miss=NaN)
+  # colnames = names(df)
+  # num_cols = [name for name in colnames if getDataType(df[!, name]) <: Number]
+  for col in names(df)
+    x = df[!, col]
+    type = getDataType(x)
+
+    if type <: AbstractFloat
+      # replace_miss(x, miss)
+      df[!, col] = drop_missing(x)
+    end
+  end
+  df
+end
+
+f = "data/PMLv2_training_forcing_flux_v20200828 (80%)_102sp.csv"
+data = fread(f)
+replace_miss!(data)
+
+## 处理观测值
+data.GPP_obs = nanmean2.(data.GPP_NT, data.GPP_DT)
+data.ET_obs = W2mm.(data.LE, data.Tavg)
+data.Rn = cal_Rn.(data.Rs, data.Rl_in, data.Tavg, data.Albedo, data.Emiss)
+
+data = @rename(data, Ca = CO2, LAI = LAI_sgfitw) # LAI_raw, LAI_whit, LAI_sgfitw
+```
+
+
+# 1. TODO
+
+## 1.1. 测试参数率定模块
+
+```{julia}
+vars = ["IGBPname", "IGBPcode", "site", "date", "GPP_obs", "ET_obs",
+  "Prcp", "Tavg", "U2", "Rn", "Rs", "VPD", "LAI", "Pa", "Ca"]
+
+IGBPs = unique_sort(data.IGBPname)
+IGBP = IGBPs[1]
+df = data[data.IGBP .== IGBP, vars]
+
+# @time theta, goal, flag = m_calib(df; IGBPcode, maxn=2500);
+@time theta, goal, flag = m_calib(df; IGBPcode=df.IGBPcode[1], maxn=2500);
+m_goal(df, theta; verbose=true)
+
+r = PMLV2_sites(df; par=theta2par(theta))
+cbind(df[:, [:site, :date, :ET_obs, :GPP_obs]], r)
+
+# @time GOF(dat_obs.GPP, dat_sim.GPP)
+# @time GOF(dat_obs.ET, dat_sim.ET)
+```
+
+## 1.2. 参数率定
+
+```{julia}
+res = []
+
+for i in eachindex(IGBPs)
+  IGBP = IGBPs[i]
+  df = data[data.IGBP .== IGBP, vars]
+  printstyled("[i=$i, IGBP = $(IGBP)] -------------------------------\n", 
+    bold=true, color=:green, underline=false)
+
+  @time theta, goal, flag = m_calib(df; IGBPcode=df.IGBPcode[1], maxn=2500);
+  
+  printstyled("-----------------------------\n", color=:blue)
+  m_goal(df, theta; verbose=true)
+
+  ## 输出数据
+  r = PMLV2_sites(df; par=theta2par(theta))
+  r = cbind(df[:, [:site, :date, :ET_obs, :GPP_obs]], r)
+
+  ## 需要记录结果，记录参数
+  push!(res, r)
+end
+
+df_out = vcat(res...)
+```
+
+
+
+
+
+
+
+# 2. 清洗驱动
+
+```{julia}
+# (Prcp, Tavg, U2, Rn, Rs, VPD, LAI, albedo, emiss) = 
+par = param0
+res = output_PML{Float64}(; n=nrow(dat));
+
+## 在进行滑动平均的时候，需要分站点去执行
+@time r = PMLV2(d.Prcp, d.Tavg, d.Rs, d.Rn, d.VPD, d.U2, LAI, d.Pa; par, res);
+@btime PMLV2($d.Prcp, $d.Tavg, $d.Rs, $d.Rn, $d.VPD, $d.U2, $LAI, $d.Pa; par, res=$res)
+
+df_out = to_df(res)
+```
+
+## 2.1. 检验结果的正确性
+
+

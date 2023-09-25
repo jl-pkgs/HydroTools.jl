@@ -1,11 +1,14 @@
 using Parameters
 
+# canopy height, in the order of `IGBP006` code
+hc_raw = [10, 10, 10, 10, 10, 1, 1, 5, 5, 0.2, 1, 0.5, 10, 1, 0.01, 0.05, 0.01]
 
 FT = Float64
 
 parNames = ["Alpha", "Thelta", "m", "Am_25",
   "VPDmin", "VPDmax", "D0", "kQ", "kA",
-  "S_sls", "fER0"]
+  "S_sls", "fER0", 
+  "hc"]
 
 params = [
   0.01 0.10 0.06  # `Alpha` : initial slope of the light response curve to assimilation 
@@ -21,14 +24,16 @@ params = [
   0.50 0.9 0.7    # `kA`    : extinction coefficients for available energy
   0.01 1.0 0.1    # `S_sls` : 
   0.01 0.5 0.1    # `fER0`  : 
+  0.01 20  1      # hc
   # 1 6 4           # `LAIref`
   # 6 14 10         # `frame`: 8-day moving window
 ]
 
-par0 = params[:, 3]
+theta0 = params[:, 3]
 parRanges = params[:, 1:2]
+param0 = list(parNames, theta0)
 
-param0 = list(parNames, par0)
+theta2par(theta) = list(parNames, theta)
 
-export parRanges, parNames, par0, param0
-export param_PML;
+export parRanges, parNames, theta0, param0, hc_raw
+export param_PML, theta2par;
