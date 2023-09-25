@@ -86,7 +86,7 @@ function GOF(obs::AbstractVector{T}, sim::AbstractVector{T}) where {T<:Real}
   R = cor(obs, sim)
   R2 = R^2
   
-  (; KGE, NSE, R2, R, RMSE, MAE, bias, bias_perc, n_valid)
+  (; NSE, R2, KGE, R, RMSE, MAE, bias, bias_perc, n_valid)
 end
 
 

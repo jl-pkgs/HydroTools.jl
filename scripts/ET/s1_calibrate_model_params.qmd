@@ -84,6 +84,9 @@ for i in eachindex(IGBPs)
 end
 
 df_out = vcat(res...)
+
+GOF(df_out.ET_obs, df_out.ET)
+GOF(df_out.GPP_obs, df_out.GPP)
 ```
 
 
