@@ -46,5 +46,6 @@ Cp = 1.013 * 1e-3 # MJ kg-1 degC-1
 
 Stefan = 4.903e-9 # u"MJ / (K^4 * m^2 *d)" # Stefan-Boltzmann constant
 
+σ = 5.67e-8 # 5.67*1e-8 Wm−2 K−4
 
 export atm, Stefan

@@ -1,7 +1,3 @@
-deg2rad(x) = x / 180 * pi
-rad2deg(x) = x / pi * 180
-
-
 function get_md(J)
   date_origin = DateTime(2010, 1, 1, 0, 0, 0) + Day(J - 1)
   Dates.format(date_origin, "mm-dd")
@@ -20,30 +16,43 @@ end
 
 
 """
-    get_σ(J; to_deg=false)
+    SolarDeclinationAngle(J; to_deg=false)
 
-
-- `黄赤交角` : σ, Solar Declination Angle
-
-- `纬度`: ϕ
-
-- `时角`: ω
+# Arguments
+- σ: Solar Declination Angle, 黄赤交角（太阳赤纬角）
+- ϕ: `纬度`
+- ω: `时角`
 """
-function get_σ(J; to_deg=false)
-  σ = 0.409 .* sin.(2 * pi / 365 * J .- 1.39) # in [rad]
-  if to_deg
-    σ = rad2deg.(σ)
-  end
-  σ
+function SolarDeclinationAngle(J::Integer; deg=false)
+  σ = 0.409 * sin(2 * pi / 365 * J .- 1.39) # Allen, Eq. 24
+  deg ? rad2deg(σ) : σ
 end
 
-function get_ssh(ϕ, J)
-  σ = get_σ.(J)
-  # rad2deg(σ)
-  tmp = -tan.(ϕ) .* tan.(σ)
-  clamp!(tmp, -1, 1)
-  # constrain in the range of [-1, 1]
-  w = acos.(tmp)
+"""
+  HourAngleSunSet(lat, J)
+
+Calculate the sunset hour angle.
+
+# Arguments
+- `lat`: Latitude in degrees.
+- `J`: Day of the year.
+
+# Returns
+- Sunset hour angle in radian
+"""
+function HourAngleSunSet(lat=0, J::Integer=1; deg=false)
+  lat = deg2rad(lat)
+  σ = SolarDeclinationAngle(J)
+
+  tmp = clamp(-tan(lat) * tan(σ), -1, 1)
+  ws = acos(tmp) # Eq. 25
+  deg ? rad2deg(ws) : ws
+end
+
+function SunshineDuration(lat=0, J::Integer=1)
+  w = HourAngleSunSet(lat, J)
   w_hour = w / pi * 12 # 距离中午的时间
   w_hour * 2 # ssh
 end
+
+export HourAngleSunSet, SunshineDuration, ssh2time

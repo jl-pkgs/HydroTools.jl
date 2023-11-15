@@ -51,3 +51,5 @@ function q2VPD(q, Tmin, Tmax, Pa=atm)
   es = cal_es(Tmin, Tmax)
   max(es - ea, 0.0)
 end
+
+export cal_es, Tdew2RH, Tdew2VPD, ea2q, q2ea, q2RH, q2VPD

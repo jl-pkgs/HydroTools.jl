@@ -48,6 +48,6 @@ end
         (NSE=0.8787878787878788, R2=1.0, KGE=0.8181818181818181, R=1.0, RMSE=1.0, MAE=1.0, bias=1.0, bias_perc=18.181818181818183, n_valid=10)
 end
 
-
+include("test-radiation.jl")
 include("test-PMLV2.jl")
 include("test-sceua.jl")

@@ -62,4 +62,5 @@ deg2rad(deg::Real) = deg / 180.0 * π
 rad2deg(rad::Real) = rad / π * 180.0
 
 
-export R2Q, Q2R, MJ2W, MJ2mm, W2MJ, W2mm, F2C, C2F, K2C, C2K, deg2rad, rad2deg
+export R2Q, Q2R, MJ2W, MJ2mm, W2MJ, W2mm, F2C, C2F, K2C, C2K
+# deg2rad, rad2deg
