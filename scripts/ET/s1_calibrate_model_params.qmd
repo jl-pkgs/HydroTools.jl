@@ -46,10 +46,11 @@ vars = ["IGBPname", "IGBPcode", "site", "date", "GPP_obs", "ET_obs",
 
 IGBPs = unique_sort(data.IGBPname)
 IGBP = IGBPs[1]
-df = data[data.IGBP .== IGBP, vars]
+df = data[data.IGBP.==IGBP, vars]
 
 # @time theta, goal, flag = m_calib(df; IGBPcode, maxn=2500);
 @time theta, goal, flag = m_calib(df; IGBPcode=df.IGBPcode[1], maxn=2500);
+
 m_goal(df, theta; verbose=true)
 
 r = PMLV2_sites(df; par=theta2par(theta))
@@ -63,30 +64,35 @@ cbind(df[:, [:site, :date, :ET_obs, :GPP_obs]], r)
 
 ```{julia}
 res = []
+params = []
 
 for i in eachindex(IGBPs)
   IGBP = IGBPs[i]
   df = data[data.IGBP .== IGBP, vars]
-  printstyled("[i=$i, IGBP = $(IGBP)] -------------------------------\n", 
+
+  @time theta, goal, flag = m_calib(df; IGBPcode=df.IGBPcode[1], maxn=2500)
+
+  printstyled("[i=$i, IGBP = $(IGBP)] -------------------------------\n",
     bold=true, color=:green, underline=false)
-
-  @time theta, goal, flag = m_calib(df; IGBPcode=df.IGBPcode[1], maxn=2500);
-  
-  printstyled("-----------------------------\n", color=:blue)
   m_goal(df, theta; verbose=true)
+  println("-----------------------------------------------------------\n")
 
+  par = theta2par(theta)
   ## 输出数据
-  r = PMLV2_sites(df; par=theta2par(theta))
+  r = PMLV2_sites(df; par)
   r = cbind(df[:, [:site, :date, :ET_obs, :GPP_obs]], r)
 
-  ## 需要记录结果，记录参数
   push!(res, r)
+  push!(params, par)
 end
 
 df_out = vcat(res...)
 
 GOF(df_out.ET_obs, df_out.ET)
 GOF(df_out.GPP_obs, df_out.GPP)
+
+mat_param = map(collect, params) |> x -> cat(x..., dims=2) |> transpose
+d_param = DataFrame(mat_param, parNames) |> d -> cbind(DataFrame(IGBP=IGBPs), d)
 ```
 
 

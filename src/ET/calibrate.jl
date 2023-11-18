@@ -59,9 +59,11 @@ end
 
 
 function m_goal(df, theta; IGBPcode=nothing, of_gof=:NSE, verbose=false)
+  # IGBPcode !== nothing && (par.hc = hc_raw[IGBPcode])
+  IGBPcode !== nothing && (theta[end] = hc_raw[IGBPcode]) # the last one is hc
   par = list(parNames, theta)
-  IGBPcode !== nothing && (par.hc = hc_raw[IGBPcode])
-
+  # @show theta
+  
   dobs = df[!, [:GPP_obs, :ET_obs]]
   dsim = PMLV2_sites(df; par)
 
@@ -86,7 +88,7 @@ end
 
 ## 最后一步，参数率定模块
 function m_calib(df::AbstractDataFrame; IGBPcode=nothing, maxn=2500, kw...)
-  theta, goal, flag = sceua(theta -> -m_goal(df, theta; kw...),
+  theta, goal, flag = sceua(theta -> -m_goal(df, theta; IGBPcode, kw...),
     theta0, parRanges[:, 1], parRanges[:, 2]; maxn, kw...)
   theta, goal, flag
 end

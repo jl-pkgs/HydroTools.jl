@@ -1,7 +1,7 @@
 export cal_Rn, cal_Rsi, cal_Rsi_toa, 
   cal_Rln, cal_Rln_out, cal_Rli, cal_Rln_yang2019
 
-
+# 辐射用的单位都是W
 """
     cal_Rn(Rs, Rln, Tavg, albedo, emiss)
 
@@ -30,9 +30,7 @@ function cal_Rn(Rs::T, Rln::T, Tavg::T, α::Float64, ϵ::Float64) where {T<:Real
   # max(Rn, T(0.0))
 end
 
-# convert from MJ m-2 d-1 to W/m2
-cal_Rln_out(T::FT, ϵ=0.96) where {FT<:Real} = Stefan * (T+K0)^4 / 0.0864 
-
+cal_Rln_out(T::FT, ϵ=1.0) where {FT<:Real} = ϵ * σ * (T + K0)^4
 
 """
   cal_Rsi_toa(lat, J)
@@ -54,14 +52,14 @@ function cal_Rsi_toa(lat=0, J::Integer=1)
   # 24 * 60 * 0.082 = 118.08
   lat = deg2rad(lat)
   Rsi_toa = 118.08 * dr / π * (ws * sin(lat) * sin(σ) + cos(lat) * cos(σ) * sin(ws)) # Allen, Eq. 21
-  max(Rsi_toa, 0)
+  max(MJ2W(Rsi_toa), 0)
 end
 
 
 """
   cal_Rsi(lat, J, ssd=nothing, cld=nothing, Z=0, a=0.25, b=0.5)
 
-Daily inward shortwave solar radiation at crop surface in MJ m-2 day-1 by
+Daily inward shortwave solar radiation at crop surface in W m-2 by
 providing sunshine duration (SSD) in hours or cloud cover in fraction.
 
 # Arguments
@@ -78,7 +76,7 @@ providing sunshine duration (SSD) in hours or cloud cover in fraction.
 - `b`: Coefficient of the Angstrom formula. Default is 0.50.
 
 # Returns
-- A tuple of solar radiation at crop surface in MJ m-2 day-1:
+- A tuple of solar radiation at crop surface in W m-2:
   - `Rsi`: Surface downward shortwave radiation.
   - `Rsi_o`: Clear-sky surface downward shortwave radiation.
   - `Rsi_toa`: Extraterrestrial radiation.
@@ -128,7 +126,6 @@ Net outgoing longwave radiation.
 """
 function cal_Rln(Tmax, Tmin, ea, cld)
   cld = isnan(cld) ? 1.0 : cld
-
   return (4.093e-9 * (((Tmax + 273.15)^4 + (Tmin + 273.15)^4) / 2)) *
          (0.34 - (0.14 * sqrt(ea))) *
          (1.35 * (1.0 - cld) - 0.35)

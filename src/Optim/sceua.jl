@@ -12,6 +12,7 @@ x, feval, exitflag, output = sceua(fn, x0, bl, bu)
 ```
 """
 function sceua(fn::Function, x0::Vector, bl::Vector, bu::Vector;
+  verbose=false,
   maxn=1000, kstop=5, pcento=0.01, peps=0.0001, ngs=5, iseed=1, iniflg=1)
   ## This is the subroutine implementing the SCE algorithm
   # written by Q.Duan; 9/2004
@@ -230,12 +231,14 @@ function sceua(fn::Function, x0::Vector, bl::Vector, bu::Vector;
     # Check for convergency
     if icall >= maxn
       exitflag = 0
-      disp("\n*** Optimization search terminated because the limit ***")
-      println("On the maximum number of trials $(maxn) has been exceeded!")
+      if verbose
+        disp("\n*** Optimization search terminated because the limit ***")
+        println("On the maximum number of trials $(maxn) has been exceeded!")
+      end
     end
     if gnrng .< peps
       exitflag = 1
-      disp("The population has converged to a prespecified small parameter space")
+      verbose && disp("The population has converged to a prespecified small parameter space")
     end
     push!(criter, bestf)
     # criter = [criter bestf]'
@@ -245,16 +248,19 @@ function sceua(fn::Function, x0::Vector, bl::Vector, bu::Vector;
 
       if criter_change .< pcento
         exitflag = 1
-        println("The best point has improved in last $(num2str(kstop)) loops by less than the threshold $(num2str(pcento))")
-        println("Convergency has achieved based on objective function criteria!!!")
+        if verbose
+          println("The best point has improved in last $(num2str(kstop)) loops by less than the threshold $(num2str(pcento))")
+          println("Convergency has achieved based on objective function criteria!!!")
+        end
       end
     end
     # End of the Outer Loops
   end
 
-  @printf("Search was stopped at trial number: %d \n", icall)
-  println("Normalized geometric range = $(num2str(gnrng))")
-  println("The best point has improved in last $(num2str(kstop)) LOOPS BY $(num2str(criter_change))")
-
+  if verbose
+    @printf("Search was stopped at trial number: %d \n", icall)
+    println("Normalized geometric range = $(num2str(gnrng))")
+    println("The best point has improved in last $(num2str(kstop)) LOOPS BY $(num2str(criter_change))")
+end
   bestx, bestf, exitflag
 end

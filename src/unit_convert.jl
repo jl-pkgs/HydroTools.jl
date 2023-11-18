@@ -19,11 +19,11 @@ R2Q(R::Real, area::Real; dt=24) = R * area / (dt * 3.6)
 Q2R(Q::Real, area::Real; dt=24) = Q * dt * 3.6 / area
 
 
-MJ2W(x::Real) = x / 86400 * 1e6
+MJ2W(x::Real) = x / 0.0864 # x / 86400 * 1e6
 
 MJ2mm(x::Real) = x / 2.45
 
-W2MJ(x::Real) = x / 1e6 * 86400
+W2MJ(x::Real) = x * 0.0864
 
 function W2mm(x::Real, Tair=0)
   lamada = 2500 - 2.2 * Tair
