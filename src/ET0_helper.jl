@@ -26,6 +26,17 @@ function cal_slope(Tair::T) where {T<:Real}
   4098.0 * (0.6108 * exp((17.27 * Tair) / (Tair + 237.3))) / (Tair + 237.3)^2
 end
 
+function cal_gamma(Tair::T, Pa=atm) where {T<:Real}
+  #  * u"kPa / K"
+  lambda = cal_lambda(Tair)
+  Cp * Pa / (ϵ * lambda)
+end
+
+function cal_bowen(Tair::T, Pa=atm) where {T<:Real}
+  Δ = cal_slope(Tair)
+  γ = cal_gamma(Tair, Pa)
+  γ / Δ
+end
 
 # rho_a: kg m-3
 function cal_rho_a(Tair, q, Pa)
@@ -63,7 +74,7 @@ end
 # Return
 - `Ga`: aerodynamic conductance in m/s
 """
-function aerodynamic_conductance(U2::T, hc::T; Zob = 15.0) where {T<:Real}
+function aerodynamic_conductance(U2::T, hc::T; Zob=15.0) where {T<:Real}
   kmar = 0.40        # von Karman's constant 0.40
   d = 0.64 * hc
   zom = 0.13 * hc
@@ -74,4 +85,4 @@ function aerodynamic_conductance(U2::T, hc::T; Zob = 15.0) where {T<:Real}
 end
 
 
-export cal_Uz, cal_U2, cal_lambda, cal_slope, mol2m
+export cal_Uz, cal_U2, cal_lambda, cal_gamma, cal_slope, cal_bowen, mol2m
