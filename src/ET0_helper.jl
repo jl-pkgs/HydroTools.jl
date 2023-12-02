@@ -15,6 +15,8 @@ function cal_Uz(U2::T, z)::T where {T<:Real}
   log(67.8 * z - 5.42) / 4.87 * U2
 end
 
+cal_Pa(z::T) where {T<:Real} = 
+  atm * (((293 - 0.0065 * z) / 293)^5.26) # kPa, Allen 1998 Eq. 7
 
 function cal_lambda(Tair::T) where {T<:Real}
   #  * u"MJ / kg"
@@ -85,4 +87,4 @@ function aerodynamic_conductance(U2::T, hc::T; Zob=15.0) where {T<:Real}
 end
 
 
-export cal_Uz, cal_U2, cal_lambda, cal_gamma, cal_slope, cal_bowen, mol2m
+export cal_Uz, cal_U2, cal_Pa, cal_lambda, cal_gamma, cal_slope, cal_bowen, mol2m
