@@ -1,5 +1,22 @@
 export cal_Rn, cal_Rsi, cal_Rsi_toa, 
   cal_Rln, cal_Rln_out, cal_Rli, cal_Rln_yang2019
+export blackbody
+
+
+"""
+blackbody radiation
+
+# Arguments
+- `Ta`: air temperature, in degC
+- `ϵ`: emissivity, default is 1
+
+# Return
+- longwave radiation, in `W m-2`
+"""
+function blackbody(Ta::T, ϵ::Real=T(1)) where {T<:Real}
+  ϵ * σ * (Ta + K0)^4
+end
+
 
 # 辐射用的单位都是W
 """

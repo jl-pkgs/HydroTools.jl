@@ -12,7 +12,7 @@ using Printf
 # Supplemental program 14.4
 sigma = 5.67e-08;             # Stefan-Boltzmann constant (W/m2/K4)
 K0 = 273.15;                # Freezing point of water (K)
-emleaf = 0.98;                # Leaf emissivity
+ϵ = 0.98;                # Leaf emissivity
 emgrnd = 1.00;                # Ground (soil) emissivity
 # emgrnd = 0.96;                # Ground (soil) emissivity
 
@@ -48,12 +48,12 @@ Kb = 0.5;
 
 # Longwave flux from ground and leaf
 Lgrnd = emgrnd * sigma * tgrnd^4;
-Lleaf = emleaf * sigma * tveg^4;
+Lleaf = ϵ * sigma * tveg^4;
 
 # Canopy integration: compare analytical solution with numerical integration
-Lc = emleaf * (irsky + Lgrnd) * (1 - exp(-Kd * LAI)) - 2 * Lleaf * (1 - exp(- Kd * LAI));
+Lc = ϵ * (irsky + Lgrnd) * (1 - exp(-Kd * LAI)) - 2 * Lleaf * (1 - exp(- Kd * LAI));
 
-f1(x) = (emleaf * Lgrnd - Lleaf) * Kd * exp(-Kd * (LAI - x)) + (emleaf * irsky - Lleaf) * Kd * exp(-Kd * x);
+f1(x) = (ϵ * Lgrnd - Lleaf) * Kd * exp(-Kd * (LAI - x)) + (ϵ * irsky - Lleaf) * Kd * exp(-Kd * x);
 Lc_numerical = quadgk(f1, 0, LAI)[1]
 
 @printf("Analytical model \n")
@@ -65,8 +65,8 @@ Lc_numerical = quadgk(f1, 0, LAI)[1]
 irveg = Lc;
 
 # Sunlit canopy: compare analytical solution with numerical integration
-Lcsun = (emleaf * irsky - Lleaf) * Kd / (Kd + Kb) * (1 - exp(-(Kd+Kb)*LAI)) + 
-   (emleaf * Lgrnd - Lleaf) * Kd / (Kd - Kb) * (exp(-Kb*LAI) - exp(-Kd*LAI));
+Lcsun = (ϵ * irsky - Lleaf) * Kd / (Kd + Kb) * (1 - exp(-(Kd+Kb)*LAI)) + 
+   (ϵ * Lgrnd - Lleaf) * Kd / (Kd - Kb) * (exp(-Kb*LAI) - exp(-Kd*LAI));
 
 f1sun(x) = f1(x) .* exp(-Kb * x);
 Lcsun_numerical = quadgk(f1sun, 0, LAI)[1]
@@ -84,11 +84,11 @@ Lcsha_numerical = quadgk(f1sha, 0, LAI)[1];
 @printf("Lcsha = %15.5f\n",Lcsha_numerical)
 
 # Absorbed longwave radiation for ground (soil)
-Ld = irsky * (1 - emleaf * (1 - exp(-Kd * LAI))) + emleaf * sigma * tveg^4 * (1 - exp(-Kd * LAI));
+Ld = irsky * (1 - ϵ * (1 - exp(-Kd * LAI))) + ϵ * sigma * tveg^4 * (1 - exp(-Kd * LAI));
 irsoi = Ld - Lgrnd;
 
 # Canopy emitted longwave radiation
-Lu = Lgrnd * (1 - emleaf * (1 - exp(-Kd * LAI))) + emleaf * sigma * tveg^4 * (1 - exp(-Kd * LAI));
+Lu = Lgrnd * (1 - ϵ * (1 - exp(-Kd * LAI))) + ϵ * sigma * tveg^4 * (1 - exp(-Kd * LAI));
 irup = Lu;
 
 # Conservation check: absorbed = incoming - outgoing
@@ -107,211 +107,4 @@ end
 @printf("irveg = %15.5f\n",irveg)
 @printf("irsoi = %15.5f\n",irsoi)
 @printf(" \n")
-```
-
-# 2. Longwave radiation transfer through canopy using Norman (1979)
-
-```{julia}
-@printf("Norman model \n")
-
-omega = 1 - emleaf; # Leaf scattering coefficient
-# --- Intercepted radiation is reflected
-rho = omega;   # Leaf reflectance
-tau = 0;       # Leaf transmittance
-
-# --- Intercepted radiation is both reflected and transmitted
-# rho = omega * 0.5;
-# tau = omega * 0.5;
-
-nlayers = ntop
-ir_source = zeros(nlayers)
-swup = zeros(nlayers + 1)
-swdn = zeros(nlayers + 1)
-atri = zeros(nlayers * 2)
-btri = zeros(nlayers * 2)
-ctri = zeros(nlayers * 2)
-dtri = zeros(nlayers * 2)
-
-# --- Emitted longwave radiation from leaves (W/m2)
-for iv = nbot:ntop
-  ir_source[iv] = emleaf * sigma * tleaf[iv]^4 * (1 - td[iv])
-end
-
-```
-
-> Set up and solve tridiagonal system of equations for upwrd and downward fluxes
-> There are two equations for each canopy layer and the soil. The first
-> equation is the upward flux and the second equation is the downward flux.
-
-```{julia}
-m = 0;
-# Soil: upward flux
-iv = nsoi;
-m = m + 1;
-atri[m] = 0;
-btri[m] = 1;
-ctri[m] = -(1 - emgrnd);
-dtri[m] = emgrnd * sigma * tgrnd^4;
-
-# Soil: downward flux
-refld = (1 - td[iv+1]) * rho;
-trand = (1 - td[iv+1]) * tau + td[iv+1];
-aiv = refld - trand * trand / refld;
-biv = trand / refld;
-
-m = m + 1;
-atri[m] = -aiv;
-btri[m] = 1;
-ctri[m] = -biv;
-dtri[m] = (1 - biv) * ir_source[iv+1];
-
-# Leaf layers, excluding top layer
-for iv = nbot:ntop-1
-  # Upward flux  
-  refld = (1 - td[iv]) * rho
-  trand = (1 - td[iv]) * tau + td[iv]
-  fiv = refld - trand * trand / refld
-  eiv = trand / refld
-
-  m = m + 1
-  atri[m] = -eiv
-  btri[m] = 1
-  ctri[m] = -fiv
-  dtri[m] = (1 - eiv) * ir_source[iv]
-
-  # Downwardflux
-  efld = (1 - td[iv+1]) * rho
-  trand = (1 - td[iv+1]) * tau + td[iv+1]
-  fiv = refld - trand * trand / refld
-  eiv = trand / refld
-
-  m = m + 1
-  atri[m] = -aiv
-  btri[m] = 1
-  ctri[m] = -biv
-  dtri[m] = (1 - biv) * ir_source[iv+1]
-end
-
-# Top canopy laye: upward flux
-iv = ntop;
-efld = (1 - td[i]) * rho;
-rand = (1 - td[iv]) * tau + td[iv];
-fiv = refld - trand * trand / refld;
-eiv = trand / refld;
-
-m = m + 1;
-atri[m] = -eiv;
-btri[m] = 1;
-ctri[m] = -fiv;
-dtri[m] = (1 - eiv) * ir_source[iv];
-
-# Top canopy layer: downward flux
-m = m + 1;
-atri[m] = 0;
-btri[m] = 1;
-ctri[m] = 0;
-dtri[m] = irsky;
-```
-
-```{julia}
-# Solve tridiagonal equations for upward and downward fluxes
-utri = f_tridiagonal_solver(atri, btri, ctri, dtri, m)
-
-# Now copy the solution (utri) to the upward (irup) and downward (irdn)
-# fluxes for each layer
-# irup - Upward longwave flux above layer
-# irdn - Downward longwave flux onto layer
-irup = zeros(nlayers + 1)
-irdn = zeros(nlayers + 1)
-irdn_eq = zeros(nlayers + 1)
-irup_eq = zeros(nlayers + 1)
-
-# Soil fluxes
-m = 0;
-iv = nsoi;
-m = m + 1;
-irup[iv] = utri[m];
-m = m + 1;
-irdn[iv] = utri[m];
-
-# Leaf layer fluxes
-for iv = nbot:ntop
-   m = m + 1;
-   irup[iv] = utri[m];
-    m = m + 1;
-   irdn[iv] = utri[m];
-end
-
-# --- Error check: compare tridiagonal solution with actual equations
-
-iv = ntop;
-irdn_eq[iv] = irsky;
-for iv = ntop-1: -1: nsoi
-   irdn_eq[iv] = irdn[iv+1] * (td[iv+1]+(1-td[iv+1])*tau) + irup[iv] * ((1-td[iv+1])*rho) +
-               emleaf*sigma*tleaf[iv+1]^4*(1-td[iv+1]);
-end
-
-iv = nsoi;
-irup_eq[iv] = (1-emgrnd) * irdn[iv] + emgrnd*sigma*tgrnd^4;
-for iv = nsoi:ntop-1
-   irup_eq[iv+1] = irup[iv] * (td[iv+1]+(1-td[iv+1])*tau) + irdn[iv+1] * ((1-td[iv+1])*rho) +
-                 emleaf*sigma*tleaf[iv+1]^4*(1-td[iv+1]);
-end
-
-for iv = nsoi:ntop
-   err = irdn_eq[iv] - irdn[iv];
-   if (abs(err) > 1e-10)
-      @printf("err = %15.5f\n",err)
-      @printf("tridiag = %15.5f\n",irdn[iv])
-      @printf("eq = %15.5f\n",irdn_eq[iv])
-      error("Norman radiation: downward error")
-   end
-   err = irup_eq[iv] - irup[iv];
-   if (abs(err) > 1e-10)
-      @printf("err = %15.5f\n",err)
-      @printf("tridiag = %15.5f\n",irup[iv])
-      @printf("eq = %15.5f\n",irup_eq[iv])
-      error("Norman radiation: upward error")
-   end
-end
-```
-
-
-```{julia}
-# --- Compute fluxes
-irabs = zeros(ntop)
-
-# Absorbed longwave radiation for ground (soil)
-iv = nsoi;
-irabs[iv] = irdn[iv] - irup[iv];
-irsoi = irabs[iv];
-
-# Absorbed longwave radiation for leaf layers
-for iv = nbot:ntop
-  irabs[iv] = emleaf * (irdn[iv] + irup[iv-1]) * (1 - td[iv]) - 2 * ir_source[iv];
-end
-
-# Sum longwave radiation absorbed by vegetation
-irveg = 0;
-for iv = nbot:ntop
-  irveg = irveg + irabs[iv];
-end
-
-# Canopy emitted longwave radiation
-irup = irup[ntop];
-
-# --- Conservation check: absorbed = incoming - outgoing
-sumabs = irsky - irup;
-err = sumabs - (irveg + irsoi);
-if (abs(err) > 1e-03)
-   @printf("err = %15.5f\n",err)
-   @printf("sumabs = %15.5f\n",sumabs)
-   @printf("irveg = %15.5f\n",irveg)
-   @printf("irsoi = %15.5f\n",irsoi)
-   error ("NormanRadiation: Longwave conservation error")
-end
-
-@printf("irup = %15.5f\n",irup)
-@printf("irveg = %15.5f\n",irveg)
-@printf("irsoi = %15.5f\n",irsoi)
 ```

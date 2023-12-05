@@ -1,5 +1,5 @@
 """
-    f_tridiagonal_solver(a, b, c, d, n::Integer)
+    tridiagonal_solver(a, b, c, d, n::Integer)
 
 Tridiagonal solver
 
@@ -32,7 +32,7 @@ equations so that:
 # Return
 - `Solution: U`
 """
-function f_tridiagonal_solver(a, b, c, d, n::Integer)
+function tridiagonal_solver(a, b, c, d, n::Integer)
   e = fill(NaN, n - 1)
   e[1] = c[1] / b[1]
 
@@ -56,4 +56,4 @@ function f_tridiagonal_solver(a, b, c, d, n::Integer)
   return (u)
 end
 
-export f_tridiagonal_solver
+export tridiagonal_solver

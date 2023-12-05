@@ -1,4 +1,4 @@
-function f_Norman_Radiation(
+function Norman_Shortwave(
   dLAI,
   PARdir=1000, PARdif=200,
   ρ=0.1, τ_l=0.05,
@@ -126,7 +126,7 @@ function f_Norman_Radiation(
   b[m] = 1
   c[m] = 0
   d[m] = PARdif
-  u = f_tridiagonal_solver(a, b, c, d, m) # Solve tridiagonal equations for fluxes
+  u = tridiagonal_solver(a, b, c, d, m) # Solve tridiagonal equations for fluxes
 
   # Now copy the solution (u) to the upward (swup) and downward (swdn) fluxes for each layer
   # swup - Upward diffuse solar flux above layer
@@ -214,3 +214,18 @@ function f_Norman_Radiation(
 end
 
 export f_Norman_Radiation
+
+
+# function update_ef2(atri, btri, ctri, dtri, ir_source, td, iv, m)
+#   refld = (1 - td[iv]) * ρ
+#   trand = (1 - td[iv]) * τ + td[iv]
+#   fiv = refld - trand * trand / refld
+#   eiv = trand / refld
+
+#   atri[m] = -eiv
+#   btri[m] = 1
+#   ctri[m] = -fiv
+#   dtri[m] = (1 - eiv) * ir_source[iv]
+#   nothing
+#   # fiv, eiv
+# end
