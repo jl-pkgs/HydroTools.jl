@@ -6,22 +6,17 @@ using QuadGK
 using Printf
 
 # @printf = @printf
-```
-
-```{julia}
-# Supplemental program 14.4
 sigma = 5.67e-08;             # Stefan-Boltzmann constant (W/m2/K4)
 K0 = 273.15;                # Freezing point of water (K)
 ϵ = 0.98;                # Leaf emissivity
-emgrnd = 1.00;                # Ground (soil) emissivity
-# emgrnd = 0.96;                # Ground (soil) emissivity
+ϵ_g = 1.00;                # Ground (soil) emissivity
+# ϵ_g = 0.96;                # Ground (soil) emissivity
 
 LAI = 4.9;                    # Leaf area index (m2/m2)
 tveg = K0 + 25;             # Canopy temperature (K)
 tgrnd = K0 + 20;            # Ground temperature (K)
-irsky = 400;                  # Atmospheric longwave radiation (W/m2)
+L_sky = 400;                  # Atmospheric longwave radiation (W/m2)
 
-# --- For Norman radiation
 nveg = 49;                    # Number of leaf layers (each with lai = dlai)
 nsoi = 1;                     # First canopy layer is soil
 nbot = nsoi + 1;              # Index for bottom leaf layer
@@ -32,14 +27,14 @@ dlai = zeros(ntop)
 td = zeros(ntop)
 
 for iv = nbot:ntop
-   tleaf[iv] = tveg;          # Leaf temperature (K)
-   dlai[iv] = 0.1;            # Layer leaf area index (m2/m2)
-   td[iv] = 0.915;            # Exponential transmittance of diffuse radiation through a single leaf layer
+   tleaf[iv] = tveg;   # Leaf temperature (K)
+   dlai[iv] = 0.1;     # Layer leaf area index (m2/m2)
+   td[iv] = 0.915;     # Exponential transmittance of diffuse radiation through a single leaf layer
 end
 
 ```
 
-# Longwave radiation transfer through canopy (analytical method)
+## 总体的辐射
 
 ```{julia}
 # Diffuse (Kd) and direct beam (Kb) extinction coefficients
@@ -47,64 +42,67 @@ Kd = 0.78;
 Kb = 0.5;
 
 # Longwave flux from ground and leaf
-Lgrnd = emgrnd * sigma * tgrnd^4;
-Lleaf = ϵ * sigma * tveg^4;
+L_g = ϵ_g * sigma * tgrnd^4;
+L_leaf = ϵ * sigma * tveg^4;
+
+τ = exp(-Kd * LAI)
 
 # Canopy integration: compare analytical solution with numerical integration
-Lc = ϵ * (irsky + Lgrnd) * (1 - exp(-Kd * LAI)) - 2 * Lleaf * (1 - exp(- Kd * LAI));
+Lc = (ϵ * (L_sky + L_g) - 2 * L_leaf) * (1 - τ);  # Eq. 14.137
 
-f1(x) = (ϵ * Lgrnd - Lleaf) * Kd * exp(-Kd * (LAI - x)) + (ϵ * irsky - Lleaf) * Kd * exp(-Kd * x);
-Lc_numerical = quadgk(f1, 0, LAI)[1]
+f_Rln(x) = (ϵ * L_g - L_leaf) * Kd * exp(-Kd * (LAI - x)) +
+           (ϵ * L_sky - L_leaf) * Kd * exp(-Kd * x); # Eq. 14.136
+Lc_numerical = quadgk(f_Rln, 0, LAI)[1]
 
 @printf("Analytical model \n")
-@printf("Lc = %15.5f\n",  Lc)
-@printf("Lc = %15.5f\n",  Lc_numerical)
+@printf("Lc = %15.5f\n", Lc)
+@printf("Lc = %15.5f\n", Lc_numerical)
 ```
 
+## 阴叶与阳叶的能量划分
+
 ```{julia}
+## 阳叶
 irveg = Lc;
+Lc_sun = (ϵ * L_sky - L_leaf) * Kd / (Kd + Kb) * (1 - exp(-(Kd + Kb) * LAI)) +
+         (ϵ * L_g - L_leaf) * Kd / (Kd - Kb) * (exp(-Kb * LAI) - τ);
 
-# Sunlit canopy: compare analytical solution with numerical integration
-Lcsun = (ϵ * irsky - Lleaf) * Kd / (Kd + Kb) * (1 - exp(-(Kd+Kb)*LAI)) + 
-   (ϵ * Lgrnd - Lleaf) * Kd / (Kd - Kb) * (exp(-Kb*LAI) - exp(-Kd*LAI));
+f_sun(x) = f_Rln(x) .* exp(-Kb * x);
+Lc_sun_numerical = quadgk(f_sun, 0, LAI)[1]
 
-f1sun(x) = f1(x) .* exp(-Kb * x);
-Lcsun_numerical = quadgk(f1sun, 0, LAI)[1]
+@printf("Lc_sun = %15.5f\n", Lc_sun)
+@printf("Lc_sun = %15.5f\n", Lc_sun_numerical)
 
-@printf("Lcsun = %15.5f\n",Lcsun)
-@printf("Lcsun = %15.5f\n",Lcsun_numerical)
+## 阴叶
+Lcsha = Lc - Lc_sun;
+f_sha(x) = f_Rln(x) .* (1 - exp(-Kb * x));
+Lcsha_numerical = quadgk(f_sha, 0, LAI)[1];
 
-# Shaded canopy: compare analytical solution with numerical integration
-Lcsha = Lc - Lcsun;
-
-f1sha(x) = f1(x) .* (1 - exp(-Kb * x));
-Lcsha_numerical = quadgk(f1sha, 0, LAI)[1];
-
-@printf("Lcsha = %15.5f\n",Lcsha)
-@printf("Lcsha = %15.5f\n",Lcsha_numerical)
+@printf("Lcsha = %15.5f\n", Lcsha)
+@printf("Lcsha = %15.5f\n", Lcsha_numerical)
 
 # Absorbed longwave radiation for ground (soil)
-Ld = irsky * (1 - ϵ * (1 - exp(-Kd * LAI))) + ϵ * sigma * tveg^4 * (1 - exp(-Kd * LAI));
-irsoi = Ld - Lgrnd;
+Ld = L_sky * (1 - ϵ * (1 - τ)) + L_leaf * (1 - τ);
+irsoi = Ld - L_g;
 
 # Canopy emitted longwave radiation
-Lu = Lgrnd * (1 - ϵ * (1 - exp(-Kd * LAI))) + ϵ * sigma * tveg^4 * (1 - exp(-Kd * LAI));
+Lu = L_g * (1 - ϵ * (1 - τ)) + L_leaf * (1 - τ);
 irup = Lu;
 
 # Conservation check: absorbed = incoming - outgoing
-sumabs = irsky - irup;
+sumabs = L_sky - irup;
 err = sumabs - (irveg + irsoi);
 if (abs(err) > 1e-03)
-   @printf("err = %15.5f\n",err)
-   @printf("sumabs = %15.5f\n",sumabs)
-   @printf("irveg = %15.5f\n",irveg)
-   @printf("irsoi = %15.5f\n",irsoi)
-   error("Analytical solution: Longwave conservation error")
+  @printf("err = %15.5f\n", err)
+  @printf("sumabs = %15.5f\n", sumabs)
+  @printf("irveg = %15.5f\n", irveg)
+  @printf("irsoi = %15.5f\n", irsoi)
+  error("Analytical solution: Longwave conservation error")
 end
 
 @printf(" \n")
-@printf("irup = %15.5f\n",irup)
-@printf("irveg = %15.5f\n",irveg)
-@printf("irsoi = %15.5f\n",irsoi)
+@printf("irup = %15.5f\n", irup)
+@printf("irveg = %15.5f\n", irveg)
+@printf("irsoi = %15.5f\n", irsoi)
 @printf(" \n")
 ```
