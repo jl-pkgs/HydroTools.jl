@@ -1,12 +1,11 @@
 function f_Norman_Radiation(
   dLAI,
+  PARdir=1000, PARdif=200,
   ρ=0.1, τ_l=0.05,
   ρ_soil_dir=0.1, ρ_soil_dif=0.1,
-  cosz=0.88, chil=0.1, Ω=0.8, 
-  PARdir=1000, PARdif=200)
+  cosz=0.88, chil=0.1, Ω=0.8)
 
   nlayers = length(dLAI)
-
   # if length(dLAI) != nlayers
   #   println("Error: the input parameters nlayers does not correspond to the length of the input vector dLAI")
   # end
@@ -18,7 +17,7 @@ function f_Norman_Radiation(
   if chil > 0.6 || chil < -0.4
     println("Chil is not inside the interval -0.4, 0.6 and was changed")
   end
-  
+
   chil = clamp(chil, -0.4, 0.6)
   phi1 = 0.5 - 0.633 * chil - 0.330 * chil^2
   phi2 = 0.877 * (1 - 2 * phi1)
@@ -32,7 +31,7 @@ function f_Norman_Radiation(
   fracsha = 1 .- fracsun
 
   laisun = (1 - exp(-Kb * lai * Ω)) / Kb
-  laisha = lai - laisun
+  # laisha = lai - laisun
 
   τ_b = exp.(-Kb * dLAI * Ω)
   τ_d = zeros(length(dLAI))
@@ -80,6 +79,7 @@ function f_Norman_Radiation(
   c[m] = -biv
   d[m] = PARdir * τ_bcum[iv+1] * (1 - τ_b[iv+1]) * (τ_l - ρ * biv)
 
+# 这里有优化的空间
   # Leaf layers, excluding top layer
   for iv in 2:nlayers
     # Upward flux
@@ -119,7 +119,7 @@ function f_Norman_Radiation(
   b[m] = 1
   c[m] = -fiv
   d[m] = PARdir * τ_bcum[iv] * (1 - τ_b[iv]) * (ρ - τ_l * eiv)
-  
+
   # Top canopy layer: downward flux
   m += 1
   a[m] = 0

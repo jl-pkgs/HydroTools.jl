@@ -31,3 +31,4 @@ streamlit
 # *.qmd
 *.csv
 *.vdoc.jl
+*temp*
