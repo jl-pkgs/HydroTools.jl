@@ -13,26 +13,34 @@ export Norman_Longwave;
 
 # Examples
 ```julia
-U, L_up, L_dn = Norman_Longwave()
+n = 50
+ϵ = [1.0; fill(0.98, n - 1)]
+T_leaf = [20.0; fill(25.0, n - 1)]
+τd = ones(n) .* 0.915     # transmittance of diffuse radiation through each leaf layer
+L_up, L_dn, Rln, Rln_soil, Rln_veg = Norman_Longwave(T_leaf, ϵ, τd)
+
+# irup  = 447.16643
+# irveg = -75.54891
+# irsoi =  28.38247
 ```
 """
-function Norman_Longwave(ϵ=0.98, ϵ_g=1.0, T_veg=25, T_g=20, L_sky=400; check_error=true)
-  # 这里应该定义一个结构体，存放参数
-  nveg = 49                    # Number of leaf layers (each with lai = dlai)
-  nsoi = 1                     # First canopy layer is soil
-  nbot = nsoi + 1              # Index for bottom leaf layer
-  ntop = nbot + nveg - 1       # Index for top leaf layer, 50
+function Norman_Longwave(
+  T_leaf::AbstractVector, ϵ::AbstractVector, τd::AbstractVector, 
+  L_sky=400.0; 
+  check_error=true) 
+  
+  ϵ_g = ϵ[1]
+  T_g = T_leaf[1]
+  
+  nsoi = 1
+  nbot = nsoi + 1       # Index for bottom leaf layer
+  ntop = length(T_leaf) # Index for top leaf layer  
 
-  tleaf = ones(ntop) .* T_veg  # Leaf temperature (degC)
-  τd = ones(ntop) .* 0.915     # transmittance of diffuse radiation through a single leaf layer
-  # dlai = ones(ntop) .* 0.1   # Layer leaf area index (m2/m2)
-
-  ω = 1 - ϵ # Leaf scattering coefficient
+  ω = 1 .- ϵ # Leaf scattering coefficient
   ρ = ω     # Leaf reflectance
   τ = 0     # Leaf transmittance
-  
-  params = (; tleaf, τd, τ, ρ, ϵ, ϵ_g)
-  # @show params
+
+  params = (; T_leaf, ϵ, τd, ρ, τ)
 
   ## 1. solve longwave radiation -----------------------------------------------
   nlayers = ntop
@@ -42,12 +50,14 @@ function Norman_Longwave(ϵ=0.98, ϵ_g=1.0, T_veg=25, T_g=20, L_sky=400; check_e
   dtri = zeros(nlayers * 2)
 
   # Emitted longwave radiation from leaves (W/m2)
-  ir_source = blackbody.(tleaf, ϵ) .* (1 .- τd) # outward Longwave
-
+  ir_source = blackbody.(ϵ, T_leaf) .* (1 .- τd) # outward Longwave
+  L_g = blackbody(ϵ_g, T_g)
+  @show L_g
+  
   # global variable: atri, btri, ctri, dtri, ir_source, τd
   function update_ef(i, m; direction="up")
-    refld = (1 - τd[i]) * ρ
-    trand = (1 - τd[i]) * τ + τd[i]
+    refld = (1 - τd[i]) * ρ[i]
+    trand = (1 - τd[i]) * τ + τd[i] # τ指的是吸收的这部分透射的。
 
     if direction == "up"
       fiv = refld - trand * trand / refld
@@ -73,7 +83,7 @@ function Norman_Longwave(ϵ=0.98, ϵ_g=1.0, T_veg=25, T_g=20, L_sky=400; check_e
   atri[m] = 0
   btri[m] = 1
   ctri[m] = -(1 - ϵ_g)
-  dtri[m] = blackbody(T_g, ϵ_g)
+  dtri[m] = L_g
 
   # Soil: downward flux
   update_ef(iv + 1, 2; direction="down")
@@ -102,14 +112,13 @@ function Norman_Longwave(ϵ=0.98, ϵ_g=1.0, T_veg=25, T_g=20, L_sky=400; check_e
   U = tridiagonal_solver(atri, btri, ctri, dtri, m) # Eq. 124
   L_up, L_dn = U2longwave(U; nsoi, nbot) # Soil fluxes
 
-  L_g = blackbody(T_g, ϵ_g)
   check_error && Norman_checkError(L_up, L_dn, L_sky, L_g, params; nsoi, ntop)
 
   # Rln for each layer
   Rln = zeros(nlayers)
   for i = nsoi+1:ntop
-    L = blackbody(tleaf[i], ϵ)
-    Rln[i] = (ϵ * (L_dn[i] + L_up[i-1]) - 2 * L) * (1 - τd[i]) # Eq. 14.129
+    L = blackbody(ϵ[i], T_leaf[i])
+    Rln[i] = (ϵ[i] * (L_dn[i] + L_up[i-1]) - 2 * L) * (1 - τd[i]) # Eq. 14.129
   end
   Rln[1] = L_dn[1] - L_up[1]
   e = sum(Rln) - (L_sky - L_up[end]) # Eq. 14.333
@@ -146,7 +155,8 @@ end
 # 检验矩阵求解的正确性
 # Error check: compare tridiagonal solution with actual equations
 function Norman_checkError(L_up, L_dn, L_sky, L_g, params; nsoi, ntop)
-  @unpack tleaf, τd, τ, ρ, ϵ, ϵ_g = params
+  @unpack T_leaf, ϵ, τd, ρ, τ = params
+  ϵ_g = ϵ[1]
 
   nlayers = length(L_up)
   L_dn_eq = zeros(nlayers)
@@ -156,16 +166,16 @@ function Norman_checkError(L_up, L_dn, L_sky, L_g, params; nsoi, ntop)
   L_dn_eq[i] = L_sky
   for i = ntop-1:-1:nsoi
     L_dn_eq[i] = L_dn[i+1] * (τd[i+1] + (1 - τd[i+1]) * τ) +
-                 L_up[i] * ((1 - τd[i+1]) * ρ) +
-                 blackbody(tleaf[i+1], ϵ) * (1 - τd[i+1]) # Bonan2019, Eq. 14.122
+                 L_up[i] * ((1 - τd[i+1]) * ρ[i+1]) +
+                 blackbody(ϵ[i+1], T_leaf[i+1]) * (1 - τd[i+1]) # Bonan2019, Eq. 14.122
   end
 
   i = nsoi
   L_up_eq[i] = (1 - ϵ_g) * L_dn[i] + L_g
   for i = nsoi:ntop-1
     L_up_eq[i+1] = L_up[i] * (τd[i+1] + (1 - τd[i+1]) * τ) +
-                   L_dn[i+1] * ((1 - τd[i+1]) * ρ) +
-                   blackbody(tleaf[i+1], ϵ) * (1 - τd[i+1]) # Bonan2019, Eq. 14.123
+                   L_dn[i+1] * ((1 - τd[i+1]) * ρ[i+1]) +
+                   blackbody(ϵ[i+1], T_leaf[i+1]) * (1 - τd[i+1]) # Bonan2019, Eq. 14.123
   end
 
   for i = nsoi:ntop

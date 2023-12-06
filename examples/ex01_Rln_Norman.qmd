@@ -1,0 +1,22 @@
+# 划分成不同层数结果差别还挺大
+
+```{julia}
+n = 2
+ϵ = [1.0; fill(0.98, n - 1)]
+T_leaf = [20.0; fill(25.0, n - 1)]
+τd = ones(n) .* 0.915     # transmittance of diffuse radiation through each leaf layer
+L_up, L_dn, Rln, Rln_soil, Rln_veg = Norman_Longwave(T_leaf, ϵ, τd);
+
+# Rln_soil, Rln_veg
+Rln
+# irup  = 447.16643
+# irveg = -75.54891
+# irsoi =  28.38247
+
+# 只有一层的情况
+# ϵ_g * L_sky - blackbody(ϵ_g, T_g) # - 418.7382685853159
+```
+
+```{julia}
+
+```

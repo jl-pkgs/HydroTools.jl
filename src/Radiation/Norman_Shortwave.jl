@@ -213,7 +213,6 @@ function Norman_Shortwave(
   )
 end
 
-export f_Norman_Radiation
 
 
 # function update_ef2(atri, btri, ctri, dtri, ir_source, td, iv, m)

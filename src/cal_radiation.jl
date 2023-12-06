@@ -13,7 +13,7 @@ blackbody radiation
 # Return
 - longwave radiation, in `W m-2`
 """
-function blackbody(Ta::T, ϵ::Real=T(1)) where {T<:Real}
+function blackbody(ϵ::T, Ta::T) where {T<:Real}
   ϵ * σ * (Ta + K0)^4
 end
 

@@ -20,6 +20,8 @@ function cal_es(Tmin::T, Tmax::T)::T where {T<:Real}
   (cal_es(Tmin) + cal_es(Tmax)) / T(2.0)
 end
 
+cal_ea(Tair::T, RH::T) where {T<:Real} = cal_es(Tair) * RH / 100
+
 function Tdew2RH(Tdew::T, Tair::T)::T where {T<:Real}
   ea::T = cal_es(Tdew)
   es::T = cal_es(Tair)
@@ -52,4 +54,4 @@ function q2VPD(q, Tmin, Tmax, Pa=atm)
   max(es - ea, 0.0)
 end
 
-export cal_es, Tdew2RH, Tdew2VPD, ea2q, q2ea, q2RH, q2VPD
+export cal_es, cal_ea, Tdew2RH, Tdew2VPD, ea2q, q2ea, q2RH, q2VPD
