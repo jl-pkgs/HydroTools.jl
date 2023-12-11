@@ -1,7 +1,7 @@
 name = "HydroTools"
 uuid = "179359cd-bac3-4aa1-bccd-287172463ab0"
 authors = ["Dongdong Kong <kongdd@users.noreply.github.com>"]
-version = "0.1.1"
+version = "0.1.2"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
@@ -21,6 +21,7 @@ PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 
 [compat]
 DataFrames = "1.6"
+DataStructures = "0.18"
 LabelledArrays = "1.14"
 Parameters = "0.12"
 Roots = "2.0"

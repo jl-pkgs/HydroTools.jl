@@ -52,7 +52,6 @@ function Norman_Longwave(
   # Emitted longwave radiation from leaves (W/m2)
   ir_source = blackbody.(ϵ, T_leaf) .* (1 .- τd) # outward Longwave
   L_g = blackbody(ϵ_g, T_g)
-  @show L_g
   
   # global variable: atri, btri, ctri, dtri, ir_source, τd
   function update_ef(i, m; direction="up")
