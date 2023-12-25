@@ -20,7 +20,8 @@ cal_Pa(z::T) where {T<:Real} =
 
 function cal_lambda(Tair::T) where {T<:Real}
   #  * u"MJ / kg"
-  (2500.0 - Tair * 2.2) / 1000.0
+  2.501 - 0.00237 * Tair # bolton 1980
+  # (2500.0 - Tair * 2.2) / 1000.0
 end
 
 function cal_slope(Tair::T) where {T<:Real}

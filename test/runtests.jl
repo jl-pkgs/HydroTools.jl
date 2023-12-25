@@ -19,10 +19,10 @@ using HydroTools
 end
 
 @testset "heat_index" begin
-  @test heat_index(30, 50) == 31.049081444444305
+  @test heat_index(30., 50.) == 31.049081444444305
   @test heat_index(28.3, 87.0) == 34.22188833448005
   @test heat_index(28.3, 12.0) == 26.761397287925213
-  @test heat_index(30, 40) < heat_index(30, 70)
+  @test heat_index(30., 40.) < heat_index(30., 70.)
 end
 
 @testset "ET0 models" begin

@@ -12,9 +12,11 @@ include("constant.jl")
 include("cal_sun_angle.jl")
 include("cal_radiation.jl")
 include("cal_humidity.jl")
+include("thermal.jl")
 
 include("ET0_helper.jl")
 include("ET0_models.jl")
+
 
 include("ET/ET.jl")
 

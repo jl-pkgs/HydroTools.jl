@@ -28,6 +28,7 @@ julia> heat_index(30, 50)
 """
 function heat_index(Tair::T, RH::T) where {T<:Real}
   Tair = C2F(Tair) # Fdeg
+  HI::T = Tair
 
   if (Tair <= 40) # about 4.44℃
     HI = Tair
@@ -44,9 +45,10 @@ end
 
 
 
-function _heat_index_Rothfusz1990(Tair::T, RH::T) where {T<:Real}
+function _heat_index_Rothfusz1990(F::T, RH::T) where {T<:Real}
+  Tair = F
   # Note, Tair: Fdeg at here
-  HI = -42.379 + 2.04901523 * Tair + 10.14333127 * RH -
+  HI::T = -42.379 + 2.04901523 * Tair + 10.14333127 * RH -
        0.22475541 * Tair * RH - 6.83783 * 10^-3 * Tair^2 -
        5.481717 * 10^-2 * RH^2 + 1.22874 * 10^-3 * Tair^2 * RH +
        8.5282 * 10^-4 * Tair * RH^2 - 1.99 * 10^-6 * Tair^2 * RH^2
@@ -88,3 +90,5 @@ function apparent_temperature(Tair::T, RH::T, U10::T) where {T<:Real}
   end
   AP
 end
+
+export _heat_index_Rothfusz1990, heat_index, wind_chill
