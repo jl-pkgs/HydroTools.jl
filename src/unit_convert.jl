@@ -48,9 +48,13 @@ mol2m(Tavg, Pa=atm) = R * (Tavg + K0) / Pa / 1000
 mol2m_rong2018(Tavg, Pa=atm) = 1e-2 / (0.446 * (273 / (273 + Tavg)) * (Pa / 101.3))
 
 
-F2C(T_degF::Real) = (T_degF - 32.0) / (9.0 / 5.0)
+function F2C(T_degF::FT)::FT where {FT<:Real} 
+  (T_degF - 32.0) / (9.0 / 5.0)
+end
 
-C2F(T_degC::Real) = T_degC * (9.0 / 5.0) + 32
+function C2F(T_degC::FT)::FT where {FT<:Real}
+  T_degC * (9.0 / 5.0) + 32
+end
 
 K2C(x::Real) = x - 273.15
 

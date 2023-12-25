@@ -48,4 +48,4 @@ Stefan = 4.903e-9 # u"MJ / (K^4 * m^2 *d)" # Stefan-Boltzmann constant
 
 σ = 5.67e-8 # 5.67*1e-8 Wm−2 K−4
 
-export atm, Stefan, K0
+export atm, Stefan, K0, Cp
