@@ -59,7 +59,7 @@ Estimate daily extraterrestrial radiation in MJ m-2 day-1.
 - `J`: Day of the year.
 
 # Returns
-- Extraterrestrial radiation in `MJ m-2 day-1`.
+- Extraterrestrial radiation in `W m-2`.
 """
 function cal_Rsi_toa(lat=0, J::Integer=1)
   dr = 1 + 0.033 * cos(π * J / 182.5) # Allen, Eq. 23
