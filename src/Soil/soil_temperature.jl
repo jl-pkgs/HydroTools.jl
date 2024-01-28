@@ -88,6 +88,6 @@ function soil_temperature(dz, dt, κ, cv, Tsoil_cur, Tsurf_next)
   # Error check
   err = edif - G - H;
   if (abs(err) > 1e-03)
-    error('Soil temp erature energy conservation error')
+    error("Soil temp erature energy conservation error")
   end
 end
