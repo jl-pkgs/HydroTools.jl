@@ -21,11 +21,9 @@
 """
 function soil_thermal_properties(dz::AbstractVector, Tsoil::AbstractVector,
   m_liq::AbstractVector, m_ice::AbstractVector;
-  soil_texture::Integer=1, method="excess-heat")
+  soil_texture::Integer=1, 
+  method="excess-heat")
   
-  ρ_wat = 1000.0                       # Density of water (kg/m3)
-  ρ_ice = 917.0                        # Density of ice (kg/m3)
-
   _c_wat = 4188.0                         # Specific heat of water (J/kg/K)
   _c_ice = 2117.27                        # Specific heat of ice (J/kg/K)
 

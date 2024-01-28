@@ -33,5 +33,5 @@ function soil_depth_init(dz::AbstractVector)
   end
   dz₊ₕ[nsoil] = 0.5 * dz[nsoil]
 
-  (; nsoil, z, z₊ₕ, dz₊ₕ)
+  (; z, z₊ₕ, dz₊ₕ)
 end
