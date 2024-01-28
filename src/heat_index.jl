@@ -44,6 +44,7 @@ function heat_index(Tair::T, RH::T) where {T<:Real}
 end
 
 
+## 这里需要验证，哪个公式是正确的。Luo2018, Li2018，公式不同
 
 function _heat_index_Rothfusz1990(F::T, RH::T) where {T<:Real}
   Tair = F

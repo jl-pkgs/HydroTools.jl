@@ -3,6 +3,10 @@ using HydroTools
 
 
 include("test-thermal.jl")
+include("test-soil.jl")
+include("test-radiation.jl")
+include("test-PMLV2.jl")
+include("test-sceua.jl")
 
 @testset "HW_index" begin
   anorm = [0.1, 0.2, 0.3, 0.2, 0.1, 0, -0.1, 0.1, 0.2, 0.3]
@@ -49,7 +53,3 @@ end
   @test GOF(1:10, 2:11) ==
         (NSE=0.8787878787878788, R2=1.0, KGE=0.8181818181818181, R=1.0, RMSE=1.0, MAE=1.0, bias=1.0, bias_perc=18.181818181818183, n_valid=10)
 end
-
-include("test-radiation.jl")
-include("test-PMLV2.jl")
-include("test-sceua.jl")

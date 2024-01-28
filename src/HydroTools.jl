@@ -25,8 +25,8 @@ include("heat_index.jl")
 include("HW_index.jl")
 include("detect_events.jl")
 include("Climate/ClimateIndex.jl")
-
 include("Radiation/Radiation.jl")
+include("Soil/Soil.jl")
 
 export cal_es, Tdew2RH, Tdew2VPD
 export cal_U2, cal_lambda, cal_slope,

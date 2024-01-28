@@ -108,7 +108,7 @@ function Norman_Longwave(
   dtri[m] = L_sky
 
   # Solve tridiagonal equations for upward and downward fluxes
-  U = tridiagonal_solver(atri, btri, ctri, dtri, m) # Eq. 124
+  U = tridiagonal_solver(atri, btri, ctri, dtri) # Eq. 124
   L_up, L_dn = U2longwave(U; nsoi, nbot) # Soil fluxes
 
   check_error && Norman_checkError(L_up, L_dn, L_sky, L_g, params; nsoi, ntop)

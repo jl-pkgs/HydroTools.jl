@@ -126,7 +126,7 @@ function Norman_Shortwave(
   b[m] = 1
   c[m] = 0
   d[m] = PARdif
-  u = tridiagonal_solver(a, b, c, d, m) # Solve tridiagonal equations for fluxes
+  u = tridiagonal_solver(a, b, c, d) # Solve tridiagonal equations for fluxes
 
   # Now copy the solution (u) to the upward (swup) and downward (swdn) fluxes for each layer
   # swup - Upward diffuse solar flux above layer
@@ -205,12 +205,18 @@ function Norman_Shortwave(
     error("NormanRadiation: Sunlit/shade solar conservation error")
   end
 
-  return OrderedDict(
-    "PARsun" => reverse(swleafsun[2:(nlayers+1)]),
-    "PARsha" => reverse(swleafsha[2:(nlayers+1)]),
-    "fracsha" => reverse(fracsha[2:(nlayers+1)]),
-    "fracsun" => reverse(fracsun[2:(nlayers+1)])
+  (; 
+    PAR_sun = reverse(swleafsun[2:(nlayers+1)]),
+    PAR_sha = reverse(swleafsha[2:(nlayers+1)]),
+    frac_sha = reverse(fracsha[2:(nlayers+1)]),
+    frac_sun = reverse(fracsun[2:(nlayers+1)])
   )
+  # return OrderedDict(
+  #   "PARsun" => reverse(swleafsun[2:(nlayers+1)]),
+  #   "PARsha" => reverse(swleafsha[2:(nlayers+1)]),
+  #   "fracsha" => reverse(fracsha[2:(nlayers+1)]),
+  #   "fracsun" => reverse(fracsun[2:(nlayers+1)])
+  # )
 end
 
 
