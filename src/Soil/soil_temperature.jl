@@ -1,4 +1,7 @@
 """
+    soil_temperature(dz, dt, κ, cv, Tsoil_cur, Tsurf_next)
+        nsoi, z, z₊ₕ, dz₊ₕ = soil_depth_init(dz)
+
 # Arguments: 
 - `Tsurf_next`: Tsurf_next_next, T0_{n+1}
 
@@ -7,10 +10,11 @@
 function soil_temperature(dz, dt, κ, cv, Tsoil_cur, Tsurf_next)
   nsoi, z, z₊ₕ, dz₊ₕ = soil_depth_init(dz)
 
-  # --- Thermal conductivity at interface (W/m/K)
+  # Thermal conductivity at interface (W/m/K)
   κ₊ₕ = zeros(1, nsoi - 1)
   @inbounds for i = 1:nsoi-1
-    κ₊ₕ[i] = κ[i] * κ[i+1] * (z[i] - z[i+1]) / (κ[i] * (z₊ₕ[i] - z[i+1]) + κ[i+1] * (z[i] - z₊ₕ[i])) # Eq. 5.16
+    κ₊ₕ[i] = κ[i] * κ[i+1] * (z[i] - z[i+1]) /
+             (κ[i] * (z₊ₕ[i] - z[i+1]) + κ[i+1] * (z[i] - z₊ₕ[i])) # Eq. 5.16
   end
 
   a = zeros(nsoi)
@@ -18,8 +22,8 @@ function soil_temperature(dz, dt, κ, cv, Tsoil_cur, Tsurf_next)
   c = zeros(nsoi)
   d = zeros(nsoi)
 
-  ## --- Set up tridiagonal matrix
-  if method == "implicit"
+  ## Set up tridiagonal matrix
+  @inbounds if method == "implicit"
     for i = 1:nsoi
       m = cv[i] * dz[i] / dt
       if i == 1
@@ -55,7 +59,7 @@ function soil_temperature(dz, dt, κ, cv, Tsoil_cur, Tsurf_next)
         a[i] = 0
         c[i] = -0.5 * κ₊ₕ[i] / dz₊ₕ[i]
         b[i] = m - c[i] + κ[i] / (0 - z[i])
-        d[i] = m * Tsoil_cur[i] + κ[i] / (0 - z[i]) * Tsurf_next  + 0.5 * f[i]
+        d[i] = m * Tsoil_cur[i] + κ[i] / (0 - z[i]) * Tsurf_next + 0.5 * f[i]
 
       elseif i < nsoi
         a[i] = -0.5 * κ₊ₕ[i-1] / dz₊ₕ[i-1]
@@ -79,14 +83,14 @@ function soil_temperature(dz, dt, κ, cv, Tsoil_cur, Tsurf_next)
   # Tsoil, G  
 
   ## --- Check for energy conservation
-  # Sum change in energy (W/m2)
-  edif = 0.0;
-  for i = 1:nsoi
-    edif += cv[i] * dz[i] * (Tsoil_next[i] - Tsoil_cur[i]) / dt;
+  
+  edif = 0.0 # Sum change in energy (W/m2)
+  @inbounds for i = 1:nsoi
+    edif += cv[i] * dz[i] * (Tsoil_next[i] - Tsoil_cur[i]) / dt
   end
 
   # Error check
-  err = edif - G - H;
+  err = edif - G - H
   if (abs(err) > 1e-03)
     error("Soil temp erature energy conservation error")
   end

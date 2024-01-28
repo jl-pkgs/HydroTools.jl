@@ -35,5 +35,3 @@ function soil_depth_init(dz::AbstractVector)
 
   (; nsoil, z, z₊ₕ, dz₊ₕ)
 end
-
-export soil_depth_init

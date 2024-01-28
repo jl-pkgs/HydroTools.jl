@@ -1,4 +1,10 @@
+export soil_depth_init
+export soil_temperature, soil_thermal_properties
+
+
 include("soil_depth_init.jl")
+include("soil_temperature.jl")
+include("soil_thermal_properties.jl")
 
 
 """
@@ -26,6 +32,9 @@ SILT = [5.0, 12.0, 32.0, 70.0, 39.0, 15.0, 56.0, 34.0, 6.0, 47.0, 20.0] # Percen
 SAND = [92.0, 82.0, 58.0, 17.0, 43.0, 58.0, 10.0, 32.0, 52.0, 6.0, 22.0] # Percent sand
 CLAY = [3.0, 6.0, 10.0, 13.0, 18.0, 27.0, 34.0, 34.0, 42.0, 47.0, 58.0] # Percent clay
 
-# Volumetric soil water content at saturation (porosity)
+# Volumetric soil water content (%) at saturation (porosity)
 # (Clapp and Hornberger. 1978. Water Resources Research 14:601-604)
 Θ_S = [0.395, 0.410, 0.435, 0.485, 0.451, 0.420, 0.477, 0.476, 0.426, 0.492, 0.482]
+
+# 饱和质量
+# cal_MS
