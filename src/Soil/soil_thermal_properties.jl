@@ -35,7 +35,6 @@ function soil_thermal_properties(dz::AbstractVector, Tsoil::AbstractVector,
   ## --- Physical constants in physcon structure
   κ_wat = 0.57                          # Thermal conductivity of water (W/m/K)
   κ_ice = 2.29                          # Thermal conductivity of ice (W/m/K)
-  λ_fus = 0.3337e6                      # Heat of fusion for water at 0 C (J/kg)
 
   ## --- Model run control parameters
   n = length(dz)

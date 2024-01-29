@@ -4,6 +4,8 @@ export ρ_wat, ρ_ice, SILT, SAND, CLAY, Θ_S
 ρ_wat = 1000.0                       # Density of water (kg/m3)
 ρ_ice = 917.0                        # Density of ice (kg/m3)
 
+λ_fus = 0.3337e6                     # Heat of fusion for water at 0 C (J/kg)
+tfrz  = K0                           # freezing Temperature (K)
 
 """
 # Initialize soil texture variables

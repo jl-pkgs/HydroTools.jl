@@ -41,8 +41,12 @@ end
     method = "apparent-heat-capacity"
     κ, cv = soil_thermal_properties(dz, Tsoil, m_liq, m_ice; soil_texture=1, method)
     Tsoil_next, G = soil_temperature(dz, dt, κ, cv, Tsoil_cur, Tsurf_next; method)
-    Tsoil_next2, G2 = soil_temperature(dz, dt, κ, cv, Tsoil_cur, Tsurf_next; method, solution = "crank-nicolson")
     @test G ≈ 464.6218567684632
+
+    Tsoil_next2, G2 = soil_temperature(dz, dt, κ, cv, Tsoil_cur, Tsurf_next; method, solution = "crank-nicolson")
+    # 已核对，与MATLAB的版本结果一致
     @test G2 ≈ 392.1533026315689
   end
+  
+  ## 这里需要做一个测试，土壤温度多久可以达到稳态
 end
