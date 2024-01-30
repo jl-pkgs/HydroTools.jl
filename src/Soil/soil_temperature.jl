@@ -1,6 +1,8 @@
 """
-    soil_temperature(dz, dt, κ, cv, Tsoil_cur, Tsurf_next)
-        
+    soil_temperature(dz::AbstractVector, dt, 
+        κ::AbstractVector, cv::AbstractVector, 
+        Tsoil_cur::AbstractVector, Tsurf_next::Real;
+        solution="implicit", method="apparent-heat-capacity")
 
 > 这里采用的是方案1的边界条件, sum(F) = G, G = - k1 * (T1 - T0) / dz1
 
@@ -17,7 +19,9 @@
 Tsoil_next, G = soil_temperature(dz, dt, κ, cv, Tsoil_cur, Tsurf_next)
 ```
 """
-function soil_temperature(dz, dt, κ, cv, Tsoil_cur, Tsurf_next; 
+function soil_temperature(dz::AbstractVector, dt, 
+  κ::AbstractVector, cv::AbstractVector, 
+  Tsoil_cur::AbstractVector, Tsurf_next::Real;
   solution="implicit", method="apparent-heat-capacity")
 
   z, z₊ₕ, dz₊ₕ = soil_depth_init(dz)

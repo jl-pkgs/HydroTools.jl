@@ -13,10 +13,21 @@
 # Examples
 
 ```julia
+dz = [0.0175, 0.0276, 0.0455, 0.0750, 0.1236, 0.2038, 0.3360, 0.5539, 0.9133, 1.5058]
+dt = 1800 # seconds, 0.5h
+n = 10
+κ = fill(1.4651477226706402, n)
+cv = fill(2.6628438e6, n)
+Tsoil_cur = fill(K0 + 25, n)
+df0 = -148.3184062187158
+f0 = -798.1091814317192
+
 Tsoil_next, G = soil_temperature_delta(dz, dt, κ, cv, Tsoil_cur, df0, f0)
 ```
 """
-function soil_temperature_delta(dz, dt, κ, cv, Tsoil_cur, df0, f0)
+function soil_temperature_delta(dz::AbstractVector, dt::Real, 
+  κ::AbstractVector, cv::AbstractVector, Tsoil_cur::AbstractVector,
+  df0::Real, f0::Real, snow_water::Real=0.0)
   # solution = "implicit", method = "apparent-heat-capacity"
   z, z₊ₕ, dz₊ₕ = soil_depth_init(dz)
   n = length(dz)
@@ -58,6 +69,7 @@ function soil_temperature_delta(dz, dt, κ, cv, Tsoil_cur, df0, f0)
   # Bottom soil layer
   e = zeros(n)
   f = zeros(n)
+  
   e[n] = a[n] / b[n]
   f[n] = d[n] / b[n]
 
@@ -80,20 +92,25 @@ function soil_temperature_delta(dz, dt, κ, cv, Tsoil_cur, df0, f0)
   pot_snow_melt = max(0, (tsoi_test - tfrz) * den / λ_fus)
   max_snow_melt = snow_water / dt        # the amount of snow that is present
   snow_melt = min(max_snow_melt, pot_snow_melt) # Cannot melt more snow than present
-
   G_snow = snow_melt * λ_fus # Energy flux for snow melt
-
-  # G_soil = f0([T_1]n) + df0 / dT * ([T_1]n + 1 - [T_1]n)
-  G_soil = f0 + df0 * (Tsoil[1] - Tsoil_cur[1]) - G_snow # 一部分能量分配给融雪
 
   # Update temperature
   Tsoil = zeros(n)
   Tsoil[1] = Tsoil_cur[1] + (num - G_snow) / den
 
+  dtsoi = Tsoil[1] - Tsoil_cur[1]
+
   # Now complete the tridiagonal solution for layers 2 to N
   @inbounds for i = 2:n
-    dtsoi = f[i] - e[i] * Tsoil[i-1]
+    # dtsoi = f[i] - e[i] * Tsoil[i-1]
+    dtsoi = f[i] - e[i] * dtsoi
     Tsoil[i] = Tsoil_cur[i] + dtsoi
   end
+  # G_soil = f0([T_1]n) + df0 / dT * ([T_1]n + 1 - [T_1]n)
+  G_soil = f0 + df0 * (Tsoil[1] - Tsoil_cur[1]) - G_snow # 一部分能量分配给融雪
+
   Tsoil, G_soil
 end
+
+
+export soil_temperature_delta

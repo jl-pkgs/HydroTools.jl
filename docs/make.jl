@@ -14,11 +14,12 @@ makedocs(
     prettyurls=CI,
   ),
   pages=[
-    "Introduction" => "index.md",
-    "Meteorology" => "Meteorology.md",
-    "Hydrology" => "Hydrology.md",
+    "Introduction"                        => "index.md",
+    "Meteorology"                         => "Meteorology.md",
+    "Hydrology"                           => "Hydrology.md",
     "Potential Evapotranspiration models" => "PET.md",
-    "Extreme Climate indexes" => "ExtremeClimate.md"
+    "Soil"                                => "Soil.md",
+    "Extreme Climate indexes"             => "ExtremeClimate.md"
   ],
   sitename="HydroTools.jl",
   warnonly=true,
