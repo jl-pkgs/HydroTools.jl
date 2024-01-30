@@ -37,25 +37,23 @@ function tridiagonal_solver(a::AbstractVector, b::AbstractVector, c::AbstractVec
   
   e = fill(NaN, n - 1)
   e[1] = c[1] / b[1]
-
-  for i in 2:(n-1)
+  @inbounds for i in 2:(n-1)
     e[i] = c[i] / (b[i] - a[i] * e[i-1])
   end
 
   f = fill(NaN, n)
   f[1] = d[1] / b[1]
-
-  for i in 2:(n)
+  @inbounds for i in 2:(n)
     f[i] = (d[i] - a[i] * f[i-1]) / (b[i] - a[i] * e[i-1])
   end
 
   u = fill(NaN, n)
   u[n] = f[n]
-
-  for i in n-1:-1:1
+  @inbounds for i in n-1:-1:1
     u[i] = f[i] - e[i] * u[i+1]
   end
-  return (u)
+  
+  return u
 end
 
 

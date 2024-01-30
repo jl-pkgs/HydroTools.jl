@@ -23,6 +23,10 @@ function soil_thermal_properties(dz::AbstractVector, Tsoil::AbstractVector,
   m_liq::AbstractVector, m_ice::AbstractVector;
   soil_texture::Integer=1, 
   method="excess-heat")
+
+  # Volumetric soil water content (%) at saturation (porosity)
+  # (Clapp and Hornberger. 1978. Water Resources Research 14:601-604)
+  Θ_S = [0.395, 0.410, 0.435, 0.485, 0.451, 0.420, 0.477, 0.476, 0.426, 0.492, 0.482]
   
   _c_wat = 4188.0                         # Specific heat of water (J/kg/K)
   _c_ice = 2117.27                        # Specific heat of ice (J/kg/K)
@@ -42,7 +46,7 @@ function soil_thermal_properties(dz::AbstractVector, Tsoil::AbstractVector,
   cv = zeros(n)
 
   k = soil_texture
-  for i = 1:n
+  @fastmath @inbounds for i = 1:n
     # --- Volumetric soil water and ice
     Θ_liq = m_liq[i] / (ρ_wat * dz[i])
     Θ_ice = m_ice[i] / (ρ_ice * dz[i])

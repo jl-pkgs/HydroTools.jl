@@ -13,12 +13,11 @@
 # Examples
 
 ```julia
-Tsoil_next, G = soil_temperature(dz, dt, κ, cv, Tsoil_cur, Tsurf_next)
+Tsoil_next, G = soil_temperature_delta(dz, dt, κ, cv, Tsoil_cur, df0, f0)
 ```
 """
-function soil_temperature_delta(dz, dt, κ, cv, Tsoil_cur, Tsurf_next; 
-  solution="implicit", method="apparent-heat-capacity")
-
+function soil_temperature_delta(dz, dt, κ, cv, Tsoil_cur, df0, f0)
+  # solution = "implicit", method = "apparent-heat-capacity"
   z, z₊ₕ, dz₊ₕ = soil_depth_init(dz)
   n = length(dz)
 
@@ -34,7 +33,8 @@ function soil_temperature_delta(dz, dt, κ, cv, Tsoil_cur, Tsurf_next;
   c = zeros(n)
   d = zeros(n)
 
-  for i = 1:n
+  # implicit
+  @inbounds for i = 1:n
     if i == 1
       a[i] = 0
       c[i] = -κ₊ₕ[i] / dz₊ₕ[i]
@@ -56,12 +56,13 @@ function soil_temperature_delta(dz, dt, κ, cv, Tsoil_cur, Tsurf_next;
 
   # --- Begin tridiagonal solution: forward sweep for layers N to 1
   # Bottom soil layer
-  i = n
-  e = a ./ b
-  f = d ./ b
-  
+  e = zeros(n)
+  f = zeros(n)
+  e[n] = a[n] / b[n]
+  f[n] = d[n] / b[n]
+
   # Layers n-1 to 2
-  for i = n-1:-1:2
+  @inbounds for i = n-1:-1:2
     den = b[i] - c[i] * e[i+1]
     e[i] = a[i] / den
     f[i] = (d[i] - c[i] * f[i+1]) / den
@@ -69,28 +70,30 @@ function soil_temperature_delta(dz, dt, κ, cv, Tsoil_cur, Tsurf_next;
 
   # Complete the tridiagonal solution to get the temperature of the top soil layer
   i = 1
-  num = d[i] - c[i] * f[i+1]
   den = b[i] - c[i] * e[i+1]
+  num = d[i] - c[i] * f[i+1]
+  f[1] = num / den
 
-  tsoi_test = Tsoil_cur[i] + num / den
+  tsoi_test = Tsoil_cur[i] + f[1]
 
   # Potential melt rate based on temperature above freezing
   pot_snow_melt = max(0, (tsoi_test - tfrz) * den / λ_fus)
-  max_snow_melt = bucket.snow_water / dt        # the amount of snow that is present
+  max_snow_melt = snow_water / dt        # the amount of snow that is present
   snow_melt = min(max_snow_melt, pot_snow_melt) # Cannot melt more snow than present
 
   G_snow = snow_melt * λ_fus # Energy flux for snow melt
 
+  # G_soil = f0([T_1]n) + df0 / dT * ([T_1]n + 1 - [T_1]n)
+  G_soil = f0 + df0 * (Tsoil[1] - Tsoil_cur[1]) - G_snow # 一部分能量分配给融雪
+
   # Update temperature
   Tsoil = zeros(n)
   Tsoil[1] = Tsoil_cur[1] + (num - G_snow) / den
-  # dtsoi = soilvar.tsoi - Tsoil_cur
 
   # Now complete the tridiagonal solution for layers 2 to N
-  for i = 2:n
+  @inbounds for i = 2:n
     dtsoi = f[i] - e[i] * Tsoil[i-1]
-    Tsoil[i] = soilvar.tsoi[i] + dtsoi
+    Tsoil[i] = Tsoil_cur[i] + dtsoi
   end
-  Tsoil
-
+  Tsoil, G_soil
 end
