@@ -4,7 +4,7 @@
 Soil depth initialization
 
 ```julia
-nsoil, z, z₊ₕ, dz₊ₕ = soil_depth_init(dz)
+z, z₊ₕ, dz₊ₕ = soil_depth_init(dz)
 ```
 """
 function soil_depth_init(dz::AbstractVector)

@@ -1,4 +1,4 @@
-using Roots
+using Roots: find_zero
 
 """
     adiabat_dry_T(P0::FT, Tk0::FT, P::FT, w=nothing)
