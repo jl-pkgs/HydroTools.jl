@@ -1,6 +1,13 @@
 using HydroTools
 using Test
 
+
+@testset "Cambell" begin
+  param = (Θ_sat=0.25, ψ_sat=-25.0, b=0.2, K_sat=3.4e-03)
+  Θ, K, ∂Θ∂ψ = Cambell(-100; param)
+  @test (Θ, K, ∂Θ∂ψ) == (0.000244140625, 1.979060471057893e-13, 1.220703125e-5)
+end
+
 @testset "soil_moisture!" begin
   n = 150
   dz = ones(n)

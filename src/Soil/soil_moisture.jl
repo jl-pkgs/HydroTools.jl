@@ -2,10 +2,22 @@ export soil_moisture!
 
 # TODO: 
 # - ψ0没有参与更新，要如何解决？
+# - 下渗，Q0
 # - 添加一个结构体，保存中间变量，节省内存
+
 
 """
     soil_moisture!(θ, ψ, ψ0, dz, dt, param; fun=van_Genuchten)
+
+为了解决相互依赖的问题，这里求解转了两次。
+```julia
+# 计算n+1/2时刻的ψ_pred，explicit方案：空间上采用n-1时刻的差分
+θ, K, Cap -> ψ_pred
+
+# Crank-Nicolson方案：空间上采用n+1, n-1时刻
+ψ_pred -> θ, K, Cap
+θ, K, Cap -> ψ
+```
 
 # Example
 ```julia

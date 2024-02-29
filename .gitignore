@@ -32,3 +32,5 @@ streamlit
 *.csv
 *.vdoc.jl
 */temp*
+
+*.ipynb
