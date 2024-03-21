@@ -9,6 +9,7 @@ export soil_moisture!
 """
     soil_moisture!(θ, ψ, ψ0, dz, dt, param; fun=van_Genuchten)
 
+
 为了解决相互依赖的问题，这里求解转了两次。
 ```julia
 # 计算n+1/2时刻的ψ_pred，explicit方案：空间上采用n-1时刻的差分
@@ -18,6 +19,11 @@ export soil_moisture!
 ψ_pred -> θ, K, Cap
 θ, K, Cap -> ψ
 ```
+
+# TODO: 
+- 加入sink相：体现蒸发`E`和入渗`I`的影响（I的影响，主要发生在前两层）
+- 研究`ψ0`如何设置
+- 更新每一层的土壤深度
 
 # Example
 ```julia
@@ -46,8 +52,8 @@ function soil_moisture!(θ, ψ, ψ0, dz, dt, param; fun=van_Genuchten)
     K₊ₕ[i] = (K[i] + K[i+1]) / 2 # can be improved, weighted by z
   end
 
-  K0_₊ₕ = K[1]
-  dz0_₊ₕ = 0.5 * dz[1]
+  K0₊ₕ = K[1]
+  dz0₊ₕ = 0.5 * dz[1]
 
   a = zeros(n)
   c = zeros(n)
@@ -58,8 +64,8 @@ function soil_moisture!(θ, ψ, ψ0, dz, dt, param; fun=van_Genuchten)
     if i == 1
       a[i] = 0
       c[i] = -K₊ₕ[i] / dz₊ₕ[i]
-      b[i] = Cap[i] * dz[i] / (0.5 * dt) + K0_₊ₕ / dz0_₊ₕ - c[i]
-      d[i] = Cap[i] * dz[i] / (0.5 * dt) * ψ[i] + K0_₊ₕ / dz0_₊ₕ * ψ0 + K0_₊ₕ - K₊ₕ[i]
+      b[i] = Cap[i] * dz[i] / (0.5 * dt) + K0₊ₕ / dz0₊ₕ - c[i]
+      d[i] = Cap[i] * dz[i] / (0.5 * dt) * ψ[i] + K0₊ₕ / dz0₊ₕ * ψ0 + K0₊ₕ - K₊ₕ[i]
     elseif i < n
       a[i] = -K₊ₕ[i-1] / dz₊ₕ[i-1]
       c[i] = -K₊ₕ[i] / dz₊ₕ[i]
@@ -81,7 +87,7 @@ function soil_moisture!(θ, ψ, ψ0, dz, dt, param; fun=van_Genuchten)
   for i = 1:n-1
     K₊ₕ[i] = (K[i] + K[i+1]) / 2 # can be improved, weighted by z
   end
-  K0_₊ₕ = K[1]
+  K0₊ₕ = K[1] # 可以按照同样的方法，设置
   
   ## second round
   # Terms for tridiagonal matrix
@@ -89,10 +95,10 @@ function soil_moisture!(θ, ψ, ψ0, dz, dt, param; fun=van_Genuchten)
     if i == 1
       a[i] = 0
       c[i] = -K₊ₕ[i] / (2 * dz₊ₕ[i])
-      b[i] = Cap[i] * dz[i] / dt + K0_₊ₕ / (2 * dz0_₊ₕ) - c[i]
-      d[i] = Cap[i] * dz[i] / dt * ψ[i] + K0_₊ₕ / (2 * dz0_₊ₕ) * ψ0 +
-             K0_₊ₕ / (2 * dz0_₊ₕ) * (ψ0 - ψ[i]) +
-             c[i] * (ψ[i] - ψ[i+1]) + K0_₊ₕ - K₊ₕ[i]
+      b[i] = Cap[i] * dz[i] / dt + K0₊ₕ / (2 * dz0₊ₕ) - c[i]
+      d[i] = Cap[i] * dz[i] / dt * ψ[i] + K0₊ₕ / (2 * dz0₊ₕ) * ψ0 +
+             K0₊ₕ / (2 * dz0₊ₕ) * (ψ0 - ψ[i]) +
+             c[i] * (ψ[i] - ψ[i+1]) + K0₊ₕ - K₊ₕ[i]
     elseif i < n
       a[i] = -K₊ₕ[i-1] / (2 * dz₊ₕ[i-1])
       c[i] = -K₊ₕ[i] / (2 * dz₊ₕ[i])
@@ -110,7 +116,7 @@ function soil_moisture!(θ, ψ, ψ0, dz, dt, param; fun=van_Genuchten)
   ψ .= tridiagonal_solver(a, b, c, d) # Solve for ψ at n+1
 
   # --- Check water balance
-  Q0 = -K0_₊ₕ / (2 * dz0_₊ₕ) * ((ψ0 - ψ_n[1]) + (ψ0 - ψ[1])) - K0_₊ₕ
+  Q0 = -K0₊ₕ / (2 * dz0₊ₕ) * ((ψ0 - ψ_n[1]) + (ψ0 - ψ[1])) - K0₊ₕ
   QN = -K[n]
 
   dθ = 0

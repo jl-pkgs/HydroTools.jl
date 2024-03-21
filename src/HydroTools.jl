@@ -4,6 +4,8 @@ using Dates
 using Dates: year
 using DataStructures: OrderedDict
 
+using Reexport
+
 include("GOF.jl")
 include("Optim/Optim.jl")
 
