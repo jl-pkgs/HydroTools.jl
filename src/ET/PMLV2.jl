@@ -1,4 +1,54 @@
 """
+    PMLV2(Prcp, Tavg, Rs, Rn, VPD, U2, LAI, Pa, Ca; par=param0, frame=3)
+
+# Notes
+一个站点的计算。注意，不同植被类型，参数不同。
+
+# Arguments
+- `frame`: in 8-days
+"""
+function PMLV2(Prcp::V, Tavg::V, Rs::V, Rn::V,
+  VPD::V, U2::V, LAI::V,
+  Pa::V, 
+  Ca::Union{T, V};
+  par=param0, frame=3,
+  res::Union{Nothing,output_PML}=nothing) where {T<:Real, V<:AbstractVector{T}}
+
+  n = length(Prcp)
+  fields = fieldnames(interm_PML)[2:end-2] # skip ET, fval_soil and Es
+  r = interm_PML{T}()
+  res === nothing && (res = output_PML{T}(; n))
+
+  for t = 1:n
+    PMLV2(Prcp[t], Tavg[t], Rs[t], Rn[t], VPD[t], U2[t], LAI[t], Pa[t], Ca[t]; par, r)
+    res[t, fields] = r
+  end
+
+  res.fval_soil = movmean2(Prcp, frame, 0) ./ movmean2(res.Es_eq, frame, 0)
+  clamp!(res.fval_soil, 0, 1)
+
+  res.Es .= res.fval_soil .* res.Es_eq
+  res.ET .= res.Ec .+ res.Ei .+ res.Es
+  res
+end
+
+
+"""
+# TODO
+> 
+
+# Arguments
+- `kw`: named keyword arguments
+  + `r`: `interm_PML`
+"""
+function PMLV2(d::AbstractDataFrame; par=param0, kw...)
+  PMLV2(d.Prcp, d.Tavg, d.Rs, d.Rn,
+    d.VPD, d.U2, d.LAI,
+    d.Pa, d.Ca; par, kw...) |> to_df
+end
+
+
+"""
   PMLV2 (Penman–Monteith–Leuning Version 2) Evapotranspiration model
 
 # Arguments
@@ -6,9 +56,12 @@
 - `Prcp` : mm/d
 - `Tavg` : degC
 - `Rs`   : W m-2
-- `Pa`   : kPa
+- `Rn`   : W m-2
+- `VPD`  : W m-2
 - `U2`   : m/s
 - `LAI`  : m2 m-2
+- `Pa`   : kPa
+- `Ca`   : ppm
 
 # Examples
 ```julia
@@ -92,7 +145,7 @@ function photosynthesis(Tavg::T, Rs::T, VPD::T, LAI::T,
   Ags = Ca * P1 / (P2 * kQ + P4 * kQ) * (
     kQ * LAI + log((P2 + P3 + P4) / (P2 + P3 * exp(kQ * LAI) + P4))) # umol m-1 s-1
   Ag = Ags  # gross assimilation rate in umol m-2 s-1
-  Ag = Ag * f_VPD_Zhang2019(VPD, par) # * data$dhour_norm^2      # constrained by f_VPD;
+  Ag = Ag * f_VPD_Zhang2019(VPD, par) # * data$dhour_norm^2  # constrained by f_VPD;
 
   GPP = Ag * 86400 / 10^6 * 12 # [umol m-2 s-1] to [g C m-2 d-1]
 

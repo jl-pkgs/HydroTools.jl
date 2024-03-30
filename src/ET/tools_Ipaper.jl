@@ -1,6 +1,8 @@
 using Statistics
 
 
+round2(x::NamedTuple, digits=3; kw...) = map(val -> round(val; digits=digits), x)
+
 # main script of moving average
 function movmean2(y::AbstractVector{T}, win_left::Integer, win_right::Integer=win_right) where {T<:Real}
   n = length(y)
@@ -58,5 +60,6 @@ function struct2tuple(x)
 end
 
 
+export round2;
 export struct2vec, struct2tuple
 export movmean2, nanmean2, getDataType, replace_miss
