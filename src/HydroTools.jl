@@ -4,6 +4,7 @@ using Dates
 using Dates: year
 using DataStructures: OrderedDict
 
+using DocStringExtensions: TYPEDFIELDS
 using Reexport
 
 include("GOF.jl")
