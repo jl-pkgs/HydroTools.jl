@@ -1,4 +1,18 @@
-using Roots: find_zero
+# using Roots: find_zero
+function find_zero_bisection(f, (a, b); tol=1e-6)
+  mid = (a + b) / 2.0
+  iters = 0
+  while abs(f(mid)) > tol
+    iters += 1
+    if f(a) * f(mid) < 0
+      b = mid
+    else
+      a = mid
+    end
+    mid = (a + b) / 2.0
+  end
+  return mid
+end
 
 """
     adiabat_dry_T(P0::FT, Tk0::FT, P::FT, w=nothing)
@@ -89,7 +103,7 @@ function LCL(T0::FT, Td::FT) where {FT<:Real}
     w - ws
   end
 
-  P_lcl = find_zero(goal, (20, P0)) # 1000 hPa to 20 hPa
+  P_lcl = find_zero_bisection(goal, (20.0, P0)) # 1000 hPa to 20 hPa
   T_lcl = adiabat_dry_T(P0, Tk0, P_lcl) - K0
   T_lcl
 end
