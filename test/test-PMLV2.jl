@@ -6,8 +6,8 @@
   VPD = 2.0
   U2 = 2.0
   LAI = 2.0
-
-  par = param0
+  
+  # par = param0
   # par = add(par, list(hc=2.0))
-  @test_nowarn PMLV2(Prcp, Tavg, Rs, Rn, VPD, U2, LAI; par)
+  @test_nowarn PMLV2(Prcp, Tavg, Rs, Rn, VPD, U2, LAI;)
 end

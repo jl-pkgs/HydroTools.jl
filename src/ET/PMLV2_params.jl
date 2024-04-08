@@ -1,7 +1,6 @@
 using Parameters
 using FieldMetadata
 import FieldMetadata: @bounds, bounds
-export bounds, Param_PMLV2
 
 
 abstract type AbstractETParam{FT<:AbstractFloat} end
@@ -64,12 +63,10 @@ FT = Float64
 
 par0 = Param_PMLV2()
 theta0 = collect(par0)
-parNames = fieldnames(Param_PMLV2)
-parRanges = get_bounds(par0)
+# parNames = fieldnames(Param_PMLV2)
+# parRanges = get_bounds(par0)
+theta2par(theta) = Param_PMLV2(theta...)
 
-param0 = list(parNames, theta0)
-
-theta2par(theta) = list(parNames, theta)
-
-export parRanges, parNames, theta0, param0, hc_raw
+export bounds, Param_PMLV2
+export parRanges, parNames, theta0, par0, hc_raw
 export param_PML, theta2par;

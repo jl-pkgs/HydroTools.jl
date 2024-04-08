@@ -1,7 +1,7 @@
 function m_goal(df, theta; IGBPcode=nothing, of_gof=:NSE, verbose=false)
   # IGBPcode !== nothing && (par.hc = hc_raw[IGBPcode])
   IGBPcode !== nothing && (theta[end] = hc_raw[IGBPcode]) # the last one is hc
-  par = list(parNames, theta)
+  par = PMLV2_params(theta...)
   # @show theta
   
   dobs = df[!, [:GPP_obs, :ET_obs]]
@@ -27,7 +27,10 @@ end
 
 
 ## 最后一步，参数率定模块
-function m_calib(df::AbstractDataFrame; IGBPcode=nothing, maxn=2500, kw...)
+function m_calib(df::AbstractDataFrame, par0::AbstractETParam; IGBPcode=nothing, maxn=2500, kw...)
+  parRanges = get_bounds(par0)
+  theta0 = collect(par0)
+  # theta需要是一个vector
   theta, goal, flag = sceua(theta -> -m_goal(df, theta; IGBPcode, kw...),
     theta0, parRanges[:, 1], parRanges[:, 2]; maxn, kw...)
   theta, goal, flag

@@ -1,5 +1,5 @@
 # 相同植被类型多个站点一起的计算
-function PMLV2_sites(df::AbstractDataFrame; par=param0, kw...)
+function PMLV2_sites(df::AbstractDataFrame; par::Param_PMLV2=Param_PMLV2(), kw...)
   sites = df.site
   grps = unique(sites)
 

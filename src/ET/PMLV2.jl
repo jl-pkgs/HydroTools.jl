@@ -11,7 +11,7 @@ function PMLV2(Prcp::V, Tavg::V, Rs::V, Rn::V,
   VPD::V, U2::V, LAI::V,
   Pa::V, 
   Ca::Union{T, V};
-  par=param0, frame=3,
+  par::Param_PMLV2=Param_PMLV2(), frame=3,
   res::Union{Nothing,output_PML}=nothing) where {T<:Real, V<:AbstractVector{T}}
 
   n = length(Prcp)
@@ -41,7 +41,7 @@ end
 - `kw`: named keyword arguments
   + `r`: `interm_PML`
 """
-function PMLV2(d::AbstractDataFrame; par=param0, kw...)
+function PMLV2(d::AbstractDataFrame; par::Param_PMLV2=Param_PMLV2(), kw...)
   PMLV2(d.Prcp, d.Tavg, d.Rs, d.Rn,
     d.VPD, d.U2, d.LAI,
     d.Pa, d.Ca; par, kw...) |> to_df
@@ -73,7 +73,8 @@ end
 3. Kong Dongdong, 2019, ISPRS
 """
 function PMLV2(Prcp::T, Tavg::T, Rs::T, Rn::T, VPD::T, U2::T, LAI::T,
-  Pa=atm, Ca=380.0; par=param0,
+  Pa=atm, Ca=380.0; 
+  par::Param_PMLV2=Param_PMLV2(),
   r::Union{Nothing,interm_PML}=nothing) where {T<:Real}
   r === nothing && (r = interm_PML{T}())
 
@@ -126,7 +127,7 @@ end
 ```
 """
 function photosynthesis(Tavg::T, Rs::T, VPD::T, LAI::T,
-  Pa=atm, Ca=380.0; par) where {T<:Real}
+  Pa=atm, Ca=380.0; par::Param_PMLV2) where {T<:Real}
 
   kQ = par.kQ # light extinction coefficient
 
@@ -172,7 +173,7 @@ end
 
 
 # Piecewise function by Yongqiang and GanRong, 2019
-function f_VPD_Zhang2019(VPD::T, par)::T where {T<:Real}
+function f_VPD_Zhang2019(VPD::T, par::Param_PMLV2)::T where {T<:Real}
   if (VPD > par.VPDmax)
     T(0.0)
   elseif VPD < par.VPDmin
@@ -187,7 +188,7 @@ end
 # References
 1. van Dijk, A.I.J.M, 2001, Eq2.
 """
-function cal_Ei_Dijk2021(Prcp, LAI, par)
+function cal_Ei_Dijk2021(Prcp::T, LAI::T, par::Param_PMLV2) where {T<:Real}
   # two params in Ei
   # @unpack S_sls, fER0 = par
   LAIref = 5
