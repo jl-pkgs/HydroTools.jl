@@ -38,5 +38,4 @@ end
 
 
 # rounded_data = NamedTuple((field => round(value) for (field, value) in data))
-
 export m_goal, m_calib
