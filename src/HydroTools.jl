@@ -16,7 +16,6 @@ include("cal_humidity.jl")
 
 include("ET/ET.jl")
 include("unit_convert.jl")
-include("Climate/ClimateIndex.jl")
 include("Radiation/Radiation.jl")
 include("Soil/Soil.jl")
 

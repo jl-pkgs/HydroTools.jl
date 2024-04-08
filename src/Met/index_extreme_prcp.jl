@@ -1,3 +1,12 @@
+# using RollingFunctions
+# using StatsBase
+export GroupFlag, CDD, CWD, index_prcp!, index_prcp
+# R20, Rx5day, R95pTOT, CDD, prcptot
+
+function GroupFlag(inds::Vector{Int64})
+  cumsum([1; diff(inds) .!= 1])
+end
+
 function rollmax5!(x5, x::AbstractVector{T}) where {T<:Real}
   win = 5
   n = length(x)
@@ -36,12 +45,12 @@ function CWD(prcp::AbstractVector{T}) where {T<:Real}
   maximum(len)
 end
 
-# function index_P(x, inds_ref::BitVector)
+# function index_prcp(x, inds_ref::BitVector)
 #   q95 = quantile(x[inds_ref], 0.95)
-#   index_P(x, q95)
+#   index_prcp(x, q95)
 # end
 
-function index_P!(x5::AbstractVector{T}, x::AbstractVector{T}, q95::T) where {T<:Real}
+function index_prcp!(x5::AbstractVector{T}, x::AbstractVector{T}, q95::T) where {T<:Real}
   rollmax5!(x5, x)
   rx5day = maximum(x5)
 
@@ -53,7 +62,7 @@ function index_P!(x5::AbstractVector{T}, x::AbstractVector{T}, q95::T) where {T<
 end
 
 
-function index_P(x::AbstractVector{T}, q95::T) where {T<:Real}
+function index_prcp(x::AbstractVector{T}, q95::T) where {T<:Real}
   x5 = rollmax(x, 5)
   rx5day = maximum(x5)
 
@@ -62,4 +71,5 @@ function index_P(x::AbstractVector{T}, q95::T) where {T<:Real}
   prcptot = sum(x[x.>=1.0])
   cdd = CDD(x)
   [cdd, r20mm, rx5day, r95ptot, prcptot]
+  # R20, Rx5day, R95pTOT, CDD, prcptot
 end
