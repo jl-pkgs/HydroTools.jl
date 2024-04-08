@@ -4,7 +4,7 @@ using Test
   cal_Rsi()
   cal_Rsi_toa()
 
-  cal_Rln(30, 20, 1, 0.5)
+  cal_Rnl(30, 20, 1, 0.5)
   cal_Rln_out(10)
   cal_Rli(10)
   cal_Rln_yang2019(20, 100, 200)
@@ -32,4 +32,9 @@ end
 @testset "Norman_Shortwave" begin
   PAR_sun, PAR_sha, frac_sha, frac_sun = Norman_Shortwave([0.1, 0.2, 0.3])
   @test PAR_sha ≈ [168.89332828782798, 159.20858966542008, 143.23329123213492]
+end
+
+@testset "cal_Rn" begin
+  r = cal_Rn(20.0, 20, 20.0, 25.0, 2.0, 10.0) # default unit is W m-2
+  @test W2MJ(r.Rn) ≈ 9.91692555
 end

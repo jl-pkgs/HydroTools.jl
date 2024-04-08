@@ -1,5 +1,5 @@
 export cal_Rn, cal_Rsi, cal_Rsi_toa, 
-  cal_Rln, cal_Rln_out, cal_Rli, cal_Rln_yang2019
+  cal_Rnl, cal_Rln_out, cal_Rli, cal_Rln_yang2019
 export blackbody
 
 
@@ -34,6 +34,11 @@ Calculate net radiation (Rn) using input parameters.
 
 # Returns
 - `Rn   `: Net radiation, W m-2.
+
+# Example
+```julia
+cal_Rn(20.0, 20, 20., 25., 2.0, 10.0)
+```
 """
 function cal_Rn(Rs::T, Rln::T, Tavg::T, α::Float64, ϵ::Float64) where {T<:Real}
   RLout = Stefan * (Tavg + 273.15)^4 / 0.0864 # convert from MJ m-2 d-1 to W/m2
@@ -45,6 +50,15 @@ function cal_Rn(Rs::T, Rln::T, Tavg::T, α::Float64, ϵ::Float64) where {T<:Real
   Rn
   # Rn, Rns, Rnl
   # max(Rn, T(0.0))
+end
+
+function cal_Rn(lat, J, Tmin::T, Tmax::T, ea::T, ssd::T; albedo=0.23, Z=0.0) where {T<:Real}
+  Rsi, Rsi_o, Rsi_toa = cal_Rsi(lat, J, ssd; Z)
+  Rnl = cal_Rnl(Tmax, Tmin, ea, Rsi, Rsi_o) # 向外为负
+
+  Rns = (1 - albedo) * Rsi
+  Rn = Rns + Rnl
+  (; Rsi, Rsi_o, Rsi_toa, Rns, Rnl, Rn)
 end
 
 cal_Rln_out(T::FT, ϵ=1.0) where {FT<:Real} = ϵ * σ * (T + K0)^4
@@ -69,6 +83,7 @@ function cal_Rsi_toa(lat=0, J::Integer=1)
   # 24 * 60 * 0.082 = 118.08
   lat = deg2rad(lat)
   Rsi_toa = 118.08 * dr / π * (ws * sin(lat) * sin(σ) + cos(lat) * cos(σ) * sin(ws)) # Allen, Eq. 21
+  
   max(MJ2W(Rsi_toa), 0)
 end
 
@@ -97,6 +112,11 @@ providing sunshine duration (SSD) in hours or cloud cover in fraction.
   - `Rsi`: Surface downward shortwave radiation.
   - `Rsi_o`: Clear-sky surface downward shortwave radiation.
   - `Rsi_toa`: Extraterrestrial radiation.
+
+# Example
+```julia
+Rsi, Rsi_o, Rsi_toa = cal_Rsi(lat, J, ssd; Z)
+```  
 """
 function cal_Rsi(lat=0, J::Integer=1, ssd=nothing, cld=nothing; 
   Z=0, a=0.25, b=0.5)
@@ -119,8 +139,8 @@ end
 
 
 """
-    cal_Rln(Tmax, Tmin, ea, cld)
-    cal_Rln(Tmax, Tmin, ea, Rsi, Rsi_o)
+    cal_Rnl(Tmax, Tmin, ea, cld)
+    cal_Rnl(Tmax, Tmin, ea, Rsi, Rsi_o)
 
 Net outgoing longwave radiation.
 
@@ -139,18 +159,19 @@ Net outgoing longwave radiation.
   calculate net outgoing longwave radiation than Rso. Default is `nothing`.
 
 # Returns
-- Net outgoing longwave radiation in MJ m-2 day-1.
+- Net outgoing longwave radiation in `W m-2`.
 """
-function cal_Rln(Tmax, Tmin, ea, cld)
+function cal_Rnl(Tmax, Tmin, ea, cld)
   cld = isnan(cld) ? 1.0 : cld
-  return (4.093e-9 * (((Tmax + 273.15)^4 + (Tmin + 273.15)^4) / 2)) *
+  
+  return -(σ * (( (Tmax + 273.15)^4 + (Tmin + 273.15)^4) / 2)) *
          (0.34 - (0.14 * sqrt(ea))) *
          (1.35 * (1.0 - cld) - 0.35)
 end
 
-function cal_Rln(Tmax, Tmin, ea, Rsi, Rsi_o)
+function cal_Rnl(Tmax, Tmin, ea, Rsi, Rsi_o)
   cld = 1.0 - Rsi / Rsi_o
-  cal_Rln(Tmax, Tmin, ea, cld)
+  cal_Rnl(Tmax, Tmin, ea, cld)
 end
 
 

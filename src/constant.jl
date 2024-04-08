@@ -44,8 +44,10 @@ Cp = 1.013 * 1e-3 # MJ kg-1 degC-1
 # Cp = 1.0164 * 1e-3 # MJ kg-1 degC-1
 # Cp = 1.0164,  // 4.2 * 0.242, specific heat at constant pressure, 1.013  [J g-1 0C-1]
 
+# Stefan-Boltzmann constant
 Stefan = 4.903e-9 # u"MJ / (K^4 * m^2 *d)" # Stefan-Boltzmann constant
-
-σ = 5.67e-8 # 5.67*1e-8 Wm−2 K−4
+# W2MJ的关系, [W m−2 K−4], https://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
+σ = 5.67e-8
+# σ = 5.670374419 * 1e-8
 
 export atm, Stefan, K0, Cp
