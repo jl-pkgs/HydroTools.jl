@@ -40,7 +40,7 @@ Calculate the sunset hour angle.
 # Returns
 - Sunset hour angle in radian
 """
-function HourAngleSunSet(lat=0, J::Integer=1; deg=false)
+@fastmath function HourAngleSunSet(lat=0, J::Integer=1; deg=false)
   lat = deg2rad(lat)
   σ = SolarDeclinationAngle(J)
 

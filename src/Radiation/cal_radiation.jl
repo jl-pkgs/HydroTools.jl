@@ -1,4 +1,4 @@
-export cal_Rn, cal_Rsi, cal_Rsi_toa, 
+export cal_Rn, cal_Rsi, cal_Rsi_toa,
   cal_Rnl, cal_Rln_out, cal_Rli, cal_Rln_yang2019
 export blackbody
 
@@ -54,11 +54,13 @@ end
 
 function cal_Rn(lat, J, Tmin::T, Tmax::T, ea::T, ssd::T; albedo=0.23, Z=0.0) where {T<:Real}
   Rsi, Rsi_o, Rsi_toa = cal_Rsi(lat, J, ssd; Z)
-  Rnl = cal_Rnl(Tmax, Tmin, ea, Rsi, Rsi_o) # 向外为负
 
-  Rns = (1 - albedo) * Rsi
-  Rn = Rns + Rnl
-  (; Rsi, Rsi_o, Rsi_toa, Rns, Rnl, Rn)
+  Rnl::T = cal_Rnl(Tmax, Tmin, ea, Rsi, Rsi_o) # 向外为负
+
+  Rns::T = (1 - albedo) * Rsi
+  Rn::T = Rns + Rnl
+  # (; Rsi, Rsi_o, Rsi_toa, Rns, Rnl, Rn)
+  Rn
 end
 
 cal_Rln_out(T::FT, ϵ=1.0) where {FT<:Real} = ϵ * σ * (T + K0)^4
@@ -83,7 +85,7 @@ function cal_Rsi_toa(lat=0, J::Integer=1)
   # 24 * 60 * 0.082 = 118.08
   lat = deg2rad(lat)
   Rsi_toa = 118.08 * dr / π * (ws * sin(lat) * sin(σ) + cos(lat) * cos(σ) * sin(ws)) # Allen, Eq. 21
-  
+
   max(MJ2W(Rsi_toa), 0)
 end
 
@@ -118,21 +120,20 @@ providing sunshine duration (SSD) in hours or cloud cover in fraction.
 Rsi, Rsi_o, Rsi_toa = cal_Rsi(lat, J, ssd; Z)
 ```  
 """
-function cal_Rsi(lat=0, J::Integer=1, ssd=nothing, cld=nothing; 
-  Z=0, a=0.25, b=0.5)
+function cal_Rsi(lat, J::Integer, ssd::T; Z=0, a=0.25, b=0.5) where {T<:AbstractFloat}
 
-  Rsi_toa = cal_Rsi_toa(lat, J)
+  Rsi_toa::T = cal_Rsi_toa(lat, J)
 
-  if cld !== nothing
-    nN = (1 - cld)
-  else
-    N = SunshineDuration(lat, J)
-    ssd = ssd === nothing ? N : ssd
-    nN = ssd / N
-  end
+  # if cld !== nothing
+  #   nN = (1 - cld)
+  # else
+  N = SunshineDuration(lat, J)
+  # ssd = ssd === nothing ? N : ssd
+  nN = ssd / N
+  # end
 
-  Rsi = (a + b * nN) * Rsi_toa
-  Rsi_o = (0.75 + 2 * Z / 1e5) * Rsi_toa
+  Rsi::T = (a + b * nN) * Rsi_toa
+  Rsi_o::T = (0.75 + 2 * Z / 1e5) * Rsi_toa
 
   Rsi, Rsi_o, Rsi_toa
 end
@@ -161,16 +162,16 @@ Net outgoing longwave radiation.
 # Returns
 - Net outgoing longwave radiation in `W m-2`.
 """
-function cal_Rnl(Tmax, Tmin, ea, cld)
+function cal_Rnl(Tmax::T, Tmin::T, ea::T, cld::T) where {T<:Real}
   cld = isnan(cld) ? 1.0 : cld
-  
-  return -(σ * (( (Tmax + 273.15)^4 + (Tmin + 273.15)^4) / 2)) *
-         (0.34 - (0.14 * sqrt(ea))) *
-         (1.35 * (1.0 - cld) - 0.35)
+
+  @fastmath -(σ * (((Tmax + 273.15)^4 + (Tmin + 273.15)^4) / 2)) *
+            (0.34 - (0.14 * sqrt(ea))) *
+            (1.35 * (1.0 - cld) - 0.35)
 end
 
-function cal_Rnl(Tmax, Tmin, ea, Rsi, Rsi_o)
-  cld = 1.0 - Rsi / Rsi_o
+function cal_Rnl(Tmax::T, Tmin::T, ea::T, Rsi::T, Rsi_o::T) where {T<:Real}
+  cld::T = 1.0 - Rsi / Rsi_o
   cal_Rnl(Tmax, Tmin, ea, cld)
 end
 

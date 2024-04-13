@@ -1,10 +1,10 @@
 using Test
 
 @testset "radiation" begin
-  cal_Rsi()
+  cal_Rsi(20.0, 20, 8.0)
   cal_Rsi_toa()
 
-  cal_Rnl(30, 20, 1, 0.5)
+  cal_Rnl(30., 20., 1.0, 0.5)
   cal_Rln_out(10)
   cal_Rli(10)
   cal_Rln_yang2019(20, 100, 200)

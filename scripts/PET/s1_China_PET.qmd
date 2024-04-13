@@ -1,0 +1,129 @@
+# 1. 计算PET_1998
+
+```{julia}
+using HydroTools
+using Ipaper
+using NetCDFTools
+using Dates
+using Test
+
+includet("main_PET.jl")
+```
+
+```{julia}
+r = cal_Rn(20.0, 20, 20.0, 25.0, 2.0, 10.0) # default unit is W m-2
+W2MJ(r) ≈ 9.91692555
+# albedo是否有必要分季节
+# cal_Rn(lat, J, Tmin::T, Tmax::T, ea::T, ssd::T; albedo=0.23, Z=0.0)
+```
+
+```{julia}
+indir = "Z:/DATA/China/CN0.5.1_ChinaDaily_025x025/latest"
+fs = dir(indir, r".nc$")
+f = fs[1]
+
+dims = ncvar_dim(f)
+lon, lat = st_dims(f)
+dates = nc_date(f)
+doys = Dates.dayofyear.(dates)
+```
+
+## 1.1. 读取数据
+
+```{julia}
+@time RH = nc_read("$indir/CN05.1_Rhu_1961_2022_daily_025x025.nc")
+@time clamp!(RH, 0.0, 100.0);
+
+@time Prcp = nc_read("$indir/CN05.1_Pre_1961_2022_daily_025x025.nc")
+
+@time Tavg = nc_read("$indir/CN05.1_Tavg_1961_2022_daily_025x025.nc")
+@time Tmin = nc_read("$indir/CN05.1_Tmin_1961_2022_daily_025x025.nc")
+@time Tmax = nc_read("$indir/CN05.1_Tmax_1961_2022_daily_025x025.nc")
+@time U2 = nc_read("$indir/CN05.1_Win_1961_2022_daily_025x025.nc")
+@time SSD = nc_read("$indir/CN05.1_Ssd_1961_2022_daily_025x025.nc")
+
+# @time ea = cal_ea.(Tavg, RH) # kPa
+Float32(x::AbstractArray) = Float32.(x)
+
+alt = nc_read("Z:/DATA/China/CN0.5.1_ChinaDaily_025x025/ht-0.25x0.25.nc") |> Float32
+```
+
+## 1.2. 保存数据
+
+```{julia}
+# PET = zeros(Float32, size(Tmin)...) .* NaN32
+# @profview _cal_PET!(PET, lat, DOY, Tmin, Tmax, Tavg, RH, SSD, U2, alt)
+@time PET, Rn = _cal_PET!(lat, doys, Tmin, Tmax, Tavg, RH, SSD, U2, alt)
+
+nc_write("CN05.1_PET_961_2021_daily_025x025.nc", "PET",
+  PET, dims; attrib=Dict("unit" => "mm/d"))
+nc_write("CN05.1_Rn_1961_2021_daily_025x025.nc", "Rn",
+  Rn, dims; attrib=Dict("unit" => "W m-2"))
+```
+
+# 2. 转换时间尺度
+
+## 2.1. yearly
+
+```{julia}
+using NaNStatistics
+
+@time PET_year = apply(PET, 3; by=years, fun=nansum)
+replace!(PET_year, 0.0 => NaN32);
+
+@time Rn_year = apply(Rn, 3; by=years, fun=nansum); # W m-2
+replace!(Rn_year, 0.0 => NaN32);
+Rn_year_mm  = W2mm.(Rn_year, 0.0)
+
+```
+
+```{julia}
+_years = 2019:2022
+inds = match2(_years, 1961:2022).I_y
+
+f = Figure(; size = (1000, 700));
+
+imagesc!(f, lon, lat, PET_year[:, :, inds],
+  colors=amwg256,
+  titles = string.(_years),
+  # col_rev=true,
+  colorrange=(800, 1500))
+# imagesc!(f, lon, lat, Rn_year_mm[:, :, inds],
+#   colors=amwg256,
+#   # col_rev=true,
+#   colorrange=(800, 1600))
+f
+```
+
+## 2.2. 8-day
+
+```{julia}
+function date_dn(dates, δt=8)
+  dn = cld.(dayofyear.(dates), δt)
+  @. Date(year(dates)) + Day((dn - 1) * 8)
+end
+
+by = date_dn(dates)
+grps = unique(by)
+
+# 计算耗时：每个2分钟
+@time PET_d8 = apply(PET, 3; by, fun=nanmean);   # mm/d
+@time Prcp_d8 = apply(Prcp, 3; by, fun=nanmean); # mm/d
+@time SSD_d8 = apply(SSD, 3; by, fun=nanmean);   # hours
+
+fout = "CN0.5.1_China_8day_1961-2022_PET,Prcp,SSD.nc"
+res = (; PET = PET_d8, Prcp = Prcp_d8, SSD = SSD_d8)
+
+_dims = [dims[1:2]..., NcDim_time(grps)]
+nc_write!(fout, res, _dims) # also need to write unit
+
+# 修改nc unit
+nc = nc_open(fout, "a")
+# delete!(nc["PET"].attrib, "a")
+nc["PET"].attrib["unit"] = "mm/d"
+nc["Prcp"].attrib["unit"] = "mm/d"
+nc["SSD"].attrib["unit"] = "hours"
+
+nc.attrib["Author"] = "Dongdong Kong; CUG; 2024-04-08"
+nc_close(nc)
+```
