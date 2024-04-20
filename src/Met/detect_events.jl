@@ -25,6 +25,8 @@ function detect_events(lgl::AbstractVector{Bool};
   index=nothing, only_max=false, ignored...)
 
   I = findall(lgl)
+  isempty(I) && return []
+  
   flag = cumsum([1; diff(I) .!= 1])
   n = flag[end]
 
@@ -105,6 +107,8 @@ function detect_events(y::AbstractVector{<:Real}, lgl::AbstractVector{Bool};
   index=nothing, only_max=false, ignored...)
 
   I = findall(lgl)
+  isempty(I) && return []
+  
   flag = cumsum([1; diff(I) .!= 1])
   n = flag[end]
 

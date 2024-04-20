@@ -36,5 +36,5 @@ end
 
 @testset "cal_Rn" begin
   r = cal_Rn(20.0, 20, 20.0, 25.0, 2.0, 10.0) # default unit is W m-2
-  @test W2MJ(r.Rn) ≈ 9.91692555
+  @test W2MJ(r) ≈ 9.91692555
 end

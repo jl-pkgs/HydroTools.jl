@@ -35,12 +35,12 @@ doys = Dates.dayofyear.(dates)
 @time clamp!(RH, 0.0, 100.0);
 
 @time Prcp = nc_read("$indir/CN05.1_Pre_1961_2022_daily_025x025.nc")
+@time SSD = nc_read("$indir/CN05.1_Ssd_1961_2022_daily_025x025.nc")
 
 @time Tavg = nc_read("$indir/CN05.1_Tavg_1961_2022_daily_025x025.nc")
 @time Tmin = nc_read("$indir/CN05.1_Tmin_1961_2022_daily_025x025.nc")
 @time Tmax = nc_read("$indir/CN05.1_Tmax_1961_2022_daily_025x025.nc")
 @time U2 = nc_read("$indir/CN05.1_Win_1961_2022_daily_025x025.nc")
-@time SSD = nc_read("$indir/CN05.1_Ssd_1961_2022_daily_025x025.nc")
 
 # @time ea = cal_ea.(Tavg, RH) # kPa
 Float32(x::AbstractArray) = Float32.(x)
@@ -55,10 +55,18 @@ alt = nc_read("Z:/DATA/China/CN0.5.1_ChinaDaily_025x025/ht-0.25x0.25.nc") |> Flo
 # @profview _cal_PET!(PET, lat, DOY, Tmin, Tmax, Tavg, RH, SSD, U2, alt)
 @time PET, Rn = _cal_PET!(lat, doys, Tmin, Tmax, Tavg, RH, SSD, U2, alt)
 
-nc_write("CN05.1_PET_961_2021_daily_025x025.nc", "PET",
+nc_write("CN05.1_PET_961_2022_daily_025x025.nc", "PET",
   PET, dims; attrib=Dict("unit" => "mm/d"))
-nc_write("CN05.1_Rn_1961_2021_daily_025x025.nc", "Rn",
+nc_write("CN05.1_Rn_1961_2022_daily_025x025.nc", "Rn",
   Rn, dims; attrib=Dict("unit" => "W m-2"))
+```
+
+```{julia}
+using GLMakie
+using MakieLayers
+
+PET = nc_read("./CN05.1_PET_1961_2022_daily_025x025.nc")
+Rn = nc_read("./CN05.1_Rn_1961_2022_daily_025x025.nc")
 ```
 
 # 2. 转换时间尺度
@@ -68,6 +76,7 @@ nc_write("CN05.1_Rn_1961_2021_daily_025x025.nc", "Rn",
 ```{julia}
 using NaNStatistics
 
+years = year.(dates)
 @time PET_year = apply(PET, 3; by=years, fun=nansum)
 replace!(PET_year, 0.0 => NaN32);
 
@@ -77,6 +86,7 @@ Rn_year_mm  = W2mm.(Rn_year, 0.0)
 
 ```
 
+> 检查空间分布情况
 ```{julia}
 _years = 2019:2022
 inds = match2(_years, 1961:2022).I_y
@@ -111,7 +121,7 @@ grps = unique(by)
 @time Prcp_d8 = apply(Prcp, 3; by, fun=nanmean); # mm/d
 @time SSD_d8 = apply(SSD, 3; by, fun=nanmean);   # hours
 
-fout = "CN0.5.1_China_8day_1961-2022_PET,Prcp,SSD.nc"
+fout = "CN05.1_8day_PET,Prcp,SSD_1961-2022.nc"
 res = (; PET = PET_d8, Prcp = Prcp_d8, SSD = SSD_d8)
 
 _dims = [dims[1:2]..., NcDim_time(grps)]
@@ -124,6 +134,6 @@ nc["PET"].attrib["unit"] = "mm/d"
 nc["Prcp"].attrib["unit"] = "mm/d"
 nc["SSD"].attrib["unit"] = "hours"
 
-nc.attrib["Author"] = "Dongdong Kong; CUG; 2024-04-08"
+nc.attrib["Author"] = "Dongdong Kong; CUG; 2024-04-15"
 nc_close(nc)
 ```
