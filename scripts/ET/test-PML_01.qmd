@@ -1,7 +1,6 @@
 ```{julia}
 using DataFrames
 using HydroTools
-using HydroTools: list
 using Test
 ```
 
@@ -15,12 +14,12 @@ VPD = 2.0
 U2 = 2.0
 LAI = 2.0
 
-par = add(param0, list(hc=2.0))
-
+par = Param_PMLV2(;)
+# par = add(param0, list(hc=2.0))
 # @testset "ET PMLV2" begin
 #   @test_nowarn PMLV2(Prcp, Tavg, Rs, Rn, VPD, U2, LAI; par)
 # end
 r = PMLV2(Prcp, Tavg, Rs, Rn, VPD, U2, LAI; par)
-typeof(r)
+# typeof(r)
 DataFrame([struct2tuple(r)])
 ```

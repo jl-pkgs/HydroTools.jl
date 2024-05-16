@@ -10,7 +10,7 @@
 function PMLV2(Prcp::V, Tavg::V, Rs::V, Rn::V,
   VPD::V, U2::V, LAI::V,
   Pa::V, 
-  Ca::Union{T, V};
+  Ca::Union{T,V}=T(380.0);
   par::Param_PMLV2=Param_PMLV2(), frame=3,
   res::Union{Nothing,output_PML}=nothing) where {T<:Real, V<:AbstractVector{T}}
 
@@ -19,8 +19,12 @@ function PMLV2(Prcp::V, Tavg::V, Rs::V, Rn::V,
   r = interm_PML{T}()
   res === nothing && (res = output_PML{T}(; n))
 
-  for t = 1:n
-    PMLV2(Prcp[t], Tavg[t], Rs[t], Rn[t], VPD[t], U2[t], LAI[t], Pa[t], Ca[t]; par, r)
+  isvec_Ca = isa(Ca, AbstractVector)
+  @inbounds for t = 1:n
+    _Ca = isvec_Ca ? Ca[t] : Ca
+    
+    PMLV2(Prcp[t], Tavg[t], Rs[t], Rn[t], VPD[t], U2[t], LAI[t], Pa[t], 
+      _Ca; par, r)
     res[t, fields] = r
   end
 

@@ -3,10 +3,8 @@ using Ipaper
 using RTableTools
 using Test
 using HydroTools
-using HydroTools: list
 using DataFrames
 using BenchmarkTools
-
 
 function replace_miss!(df::AbstractDataFrame, miss=NaN)
   # colnames = names(df)
@@ -32,7 +30,7 @@ data.GPP_obs = nanmean2.(data.GPP_NT, data.GPP_DT)
 data.ET_obs = W2mm.(data.LE, data.Tavg)
 data.Rn = cal_Rn.(data.Rs, data.Rl_in, data.Tavg, data.Albedo, data.Emiss)
 
-data = @rename(data, Ca = CO2, LAI = LAI_sgfitw) # LAI_raw, LAI_whit, LAI_sgfitw
+data = @rename(data, Ca = CO2, LAI = LAI_whit) # LAI_raw, LAI_whit, LAI_sgfitw
 ```
 
 
@@ -49,11 +47,11 @@ IGBP = IGBPs[1]
 df = data[data.IGBP.==IGBP, vars]
 
 # @time theta, goal, flag = m_calib(df; IGBPcode, maxn=2500);
-@time theta, goal, flag = m_calib(df; IGBPcode=df.IGBPcode[1], maxn=2500);
+@time _theta, goal, flag = m_calib(df, par0; IGBPcode=df.IGBPcode[1], maxn=2500);
 
-m_goal(df, theta; verbose=true)
+m_goal(df, _theta; verbose=true)
 
-r = PMLV2_sites(df; par=theta2par(theta))
+r = PMLV2_sites(df; par=theta2par(_theta))
 cbind(df[:, [:site, :date, :ET_obs, :GPP_obs]], r)
 
 # @time GOF(dat_obs.GPP, dat_sim.GPP)
@@ -63,58 +61,68 @@ cbind(df[:, [:site, :date, :ET_obs, :GPP_obs]], r)
 ## 1.2. 参数率定
 
 ```{julia}
-res = []
-params = []
+## 训练可以改成并行格式
+# for i in eachindex(IGBPs)
+@time params = par_map(IGBP -> begin
+    df = data[data.IGBP.==IGBP, vars]
+    theta, goal, flag = m_calib(df, par0; IGBPcode=df.IGBPcode[1], maxn=2500, verbose=false)
+    theta
+  end, IGBPs)
+```
 
-for i in eachindex(IGBPs)
-  IGBP = IGBPs[i]
-  df = data[data.IGBP .== IGBP, vars]
+```{julia}
+# 取回模拟数据
+@time res = map(i -> begin
+    IGBP = IGBPs[i]
+    theta = params[i]
 
-  @time theta, goal, flag = m_calib(df; IGBPcode=df.IGBPcode[1], maxn=2500)
+    df = data[data.IGBP.==IGBP, vars]
 
-  printstyled("[i=$i, IGBP = $(IGBP)] -------------------------------\n",
-    bold=true, color=:green, underline=false)
-  m_goal(df, theta; verbose=true)
-  println("-----------------------------------------------------------\n")
+    printstyled("[i=$i, IGBP = $IGBP] \n", bold=true, color=:green, underline=false)
+    m_goal(df, theta; verbose=true)
 
-  par = theta2par(theta)
-  ## 输出数据
-  r = PMLV2_sites(df; par)
-  r = cbind(df[:, [:site, :date, :ET_obs, :GPP_obs]], r)
+    par = theta2par(theta)
+    r = PMLV2_sites(df; par)
+    cbind(df[:, [:site, :date, :ET_obs, :GPP_obs]], r)
+  end, eachindex(params))
+df_out = melt_list(res; IGBP=IGBPs)
+```
 
-  push!(res, r)
-  push!(params, par)
-end
 
-df_out = vcat(res...)
+```{julia}
+GOF(df_out.ET_obs, df_out.ET)   # 0.67
+GOF(df_out.GPP_obs, df_out.GPP) # 使用`LAI_sgfitw`模拟效果稍好
 
-GOF(df_out.ET_obs, df_out.ET)
-GOF(df_out.GPP_obs, df_out.GPP)
-
+parNames = fieldnames(Param_PMLV2) |> collect
 mat_param = map(collect, params) |> x -> cat(x..., dims=2) |> transpose
 d_param = DataFrame(mat_param, parNames) |> d -> cbind(DataFrame(IGBP=IGBPs), d)
 ```
 
+在`8-day`尺度上训练模型
 
+```julia
+julia> GOF(df_out.GPP_obs, df_out.GPP)
+(NSE = 0.7336100609128524, R2 = 0.743877707336761, KGE = 0.7290308937710843, R = 0.8624834533698377, RMSE = 
+2.1021603075996738, MAE = 1.4098040085324788, bias = 0.18238338885413943, bias_perc = 4.8376021107084135, n_valid = 26414)
 
-
-
-
+julia> GOF(df_out.ET_obs, df_out.ET)
+(NSE = 0.6649426918563545, R2 = 0.68019886318664, KGE = 0.8156453875675587, R = 0.8247416948273198, RMSE = 0.7324277346700488, MAE = 0.4914732035326359, bias = -0.029484677463582167, bias_perc = -1.8958637090078327, 
+n_valid = 21607)
+```
 
 # 2. 清洗驱动
 
 ```{julia}
 # (Prcp, Tavg, U2, Rn, Rs, VPD, LAI, albedo, emiss) = 
-par = param0
+d = df
+par = par0
 res = output_PML{Float64}(; n=nrow(dat));
 
 ## 在进行滑动平均的时候，需要分站点去执行
-@time r = PMLV2(d.Prcp, d.Tavg, d.Rs, d.Rn, d.VPD, d.U2, LAI, d.Pa; par, res);
-@btime PMLV2($d.Prcp, $d.Tavg, $d.Rs, $d.Rn, $d.VPD, $d.U2, $LAI, $d.Pa; par, res=$res)
-
-df_out = to_df(res)
+@time r = PMLV2(d.Prcp, d.Tavg, d.Rs, d.Rn, d.VPD, d.U2, d.LAI, d.Pa; 
+  par, res);
+# @btime PMLV2($d.Prcp, $d.Tavg, $d.Rs, $d.Rn, $d.VPD, $d.U2, $LAI, $d.Pa; par, res=$res)
+# df_out = to_df(res)
 ```
 
 ## 2.1. 检验结果的正确性
-
-

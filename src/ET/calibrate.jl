@@ -1,7 +1,7 @@
 function m_goal(df, theta; IGBPcode=nothing, of_gof=:NSE, verbose=false)
   # IGBPcode !== nothing && (par.hc = hc_raw[IGBPcode])
   IGBPcode !== nothing && (theta[end] = hc_raw[IGBPcode]) # the last one is hc
-  par = PMLV2_params(theta...)
+  par = Param_PMLV2(theta...)
   # @show theta
   
   dobs = df[!, [:GPP_obs, :ET_obs]]
