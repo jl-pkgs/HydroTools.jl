@@ -1,3 +1,5 @@
+Γd = 0.0098 # K/m
+
 T0 = 273.15
 
 K0 = 273.15
@@ -6,7 +8,8 @@ L = 2.5e6
 
 Es_T0 = 6.11
 
-atm = 101.325
+atm = 101.325 # kPa
+Pa_atm = 101.325 # kPa
 
 #' Molecular weight
 #' 
@@ -15,9 +18,10 @@ atm = 101.325
 #' `Md`: [Molecular weight](https://en.wikipedia.org/wiki/Molar_mass) of water vapor \eqn{M_w = 18.01528g/mol}
 #' `epsilon`: the ratio of `Mw` to `Md`
 Mw = 18.01528
+Md = 28.96340
 
-#' @rdname Mw
-Md = 28.9634
+M_dry = 18.01528 * 1e-3 # [kg mol-1]
+M_h2o = 28.96340 * 1e-3
 
 #' @rdname Mw
 ϵ = Mw / Md
@@ -34,13 +38,13 @@ R = 8.3144621 # J/(mol K)
 
 #' @rdname R
 #' @export
-Rw = R / Mw * 1000. # J/(kg K)
+Rw = R / M_h2o # ≈ 461.5 [J kg-1 K-1]
 
 #' @rdname R
 #' @export
-Rd = R / Md * 1000.
+Rd = R / M_dry # ≈ 287.1 [J kg-1 K-1]
 
-Cp = 1.013 * 1e-3 # MJ kg-1 degC-1
+Cp = 1.013 * 1e-3 # [MJ kg-1 K-1]
 # Cp = 1.0164 * 1e-3 # MJ kg-1 degC-1
 # Cp = 1.0164,  // 4.2 * 0.242, specific heat at constant pressure, 1.013  [J g-1 0C-1]
 

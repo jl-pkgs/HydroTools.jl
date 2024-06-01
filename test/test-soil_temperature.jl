@@ -18,7 +18,7 @@ end
   df0 = -148.3184062187158
   f0 = -798.1091814317192
 
-  Tsoil_next, G = soil_temperature_delta(dz, dt, κ, cv, Tsoil_cur, df0, f0)
+  Tsoil_next, G_soil, G_snow = soil_temperature_delta(dz, dt, κ, cv, Tsoil_cur, df0, f0)
   @test Tsoil_next[1] ≈ 294.30394328396324
   @test Tsoil_next[2] ≈ 296.2755002132709
   @test Tsoil_next[3] ≈ 297.56178599804434

@@ -58,7 +58,6 @@ theta_wet(850., 20.0, 18.0)
 theta_wet_bolton(850., 20.0, 18.0)
 ```
 """
-
 function adiabat_dry_T(P0::FT, Tk0::FT, P::FT, w=nothing) where {FT<:Real}
   if w === nothing
     m = Rd / (Cp * 1e6) # 0.283
@@ -67,6 +66,7 @@ function adiabat_dry_T(P0::FT, Tk0::FT, P::FT, w=nothing) where {FT<:Real}
   end
   Tk0 * (P / P0)^m
 end
+
 
 function adiabat_dry_P(P0::FT, Tk0::FT, T::FT, w=nothing) where {FT<:Real}
   if w === nothing
@@ -146,3 +146,4 @@ end
 export theta, theta_se, LCL, LCL_bolton,
   adiabat_dry_T, adiabat_dry_P,
   theta_wet, theta_wet_bolton
+export cal_θ

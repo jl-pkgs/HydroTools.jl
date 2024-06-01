@@ -1,0 +1,90 @@
+```{julia}
+using HydroTools
+
+nday = 30  # Number of days to simulate, repeating the same diurnal cycle
+doy = 182.0  # Day of year (1 to 365) for solar radiation
+
+# Phase change: use 'excess-heat' or 'apparent-heat-capacity'
+soilvar = Dict("method" => "excess-heat")
+
+# --- Atmospheric forcing at a reference height
+forcvar = Dict("zref" => 30.0,
+  "uref" => 3.0,
+  "pref" => 101325,
+  "rain" => 0.0,
+  "snow" => 0.0)  # Reference height (m)
+
+tmean = 25.0  # Mean daily air temperature (C)
+trange = 10.0  # Temperature range for diurnal cycle (C)
+RH = 70.0  # Relative humidity (%)
+lat = 40.0 * pi / 180  # Latitude (degrees -> radians) for solar radiation
+```
+
+# Site characteristics
+
+```{julia}
+# Surface albedo for visible and near-infrared wavebands
+α_surf = (; vis = 0.1, nir = 0.2)
+α_snow = (; vis = 0.95, nir = 0.70)
+ϵ = 0.98
+hc = 20.0
+LAI = 5.0
+snow_mask = 100.0  # Snow albedo masking depth (kg H2O/m2)
+```
+
+```{julia}
+# For Harman and Finnigan (2007, 2008) roughness sublayer (RSL)
+lad = LAI / hc  # Leaf area density (m2/m3)
+cd = 0.20  # Leaf drag coefficient (dimensionless)
+surfvar["Lc"] = 1 / (cd * lad)  # Canopy density length scale (m)
+surfvar["rc"] = 0.2  # Leaf Nusselt number (heat) or Stanton number (scalar)
+
+# For Monin-Obukhov parameterization (MOST)
+fluxvar = Dict("profiles" => "MOST",
+  "bucket" => "no_bucket",
+  "disp" => 0.67 * hc, # Displacement height (m)
+  "z0m" => 0.13 * hc  # Roughness length for momentum (m)
+)
+fluxvar["z0c"] = 0.10 * fluxvar["z0m"] # Roughness length for scalars (m)
+fluxvar
+```
+
+```{julia}
+# Soil layer thickness (m)
+dz = [0.0175, 0.0276, 0.0455, 0.0750, 0.1236, 0.2038, 0.3360, 0.5539, 0.9133, 1.5058];
+nsoil = length(dz)
+soil = soil_depth_init(dz);
+
+Tsoil = zeros(nsoil)
+h2osoi_ice = zeros(nsoil)
+h2osoi_liq = zeros(nsoil)
+soil_texture = 5
+
+# Initial soil temperature (K) and unfrozen and frozen water (kg H2O/m2)
+for i in 1:nsoil
+  Tsoil[i] = tmean + K0 # Temperature
+
+  # Soil water at saturation (kg H2O/m2)
+  h2osoi_sat = Θ_S[soil_texture] * ρ_wat * dz[i]
+  
+  # Actual water content is some fraction of saturation. These are only used for soil
+  # thermal properties and phase change. Note the inconsistency with the use of soil
+  # water in the bucket model to calculate the soil wetness factor.
+  satfrac = 0.85
+  if Tsoil[i] > K0
+    h2osoi_ice[i] = 0
+    h2osoi_liq[i] = satfrac * h2osoi_sat
+  else
+    h2osoi_ice[i] = satfrac * h2osoi_sat
+    h2osoi_liq[i] = 0
+  end
+end
+```
+
+```{julia}
+T_surf = Tsoil[1];
+es, d_es = satvap(tsrf - K0)
+
+dt = 1800;    # Time step (seconds)
+ntime = round(86400/dt);
+```

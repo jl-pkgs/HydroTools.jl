@@ -1,0 +1,34 @@
+# Wujia
+
+```{julia}
+using HydroTools
+using Ipaper
+using NetCDFTools
+using MakieLayers
+using GLMakie
+```
+
+
+```{julia}
+r = cal_Rn(20.0, 20, 20.0, 25.0, 2.0, 10.0) # default unit is W m-2
+@test W2MJ(r.Rn) ≈ 9.91692555
+
+# albedo是否有必要分季节
+cal_Rn(lat, J, Tmin::T, Tmax::T, ea::T, ssd::T; albedo=0.23, Z=0.0)
+```
+
+```{julia}
+fs = dir("Z:/DATA/China/CN0.5.1_ChinaDaily_025x025/latest", r".nc$")
+
+f = "Z:/DATA/China/CN0.5.1_ChinaDaily_025x025/ht-0.25x0.25.nc"
+nc_info(f)
+alt = nc_read(f)
+lon, lat = st_dims(f)
+```
+
+## 计算PET_1998
+
+
+```{julia}
+imagesc(lon, lat, alt)
+```

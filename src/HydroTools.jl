@@ -14,11 +14,13 @@ include("Optim/Optim.jl")
 include("constant.jl")
 
 include("cal_humidity.jl")
+include("thermal.jl")
 
 include("ET/ET.jl")
 include("unit_convert.jl")
 include("Radiation/Radiation.jl")
 include("Soil/Soil.jl")
+include("SurfaceFluxes/SurfaceFluxes.jl")
 
 include("Met/Met.jl")
 

@@ -32,11 +32,9 @@ function root_hybrid(func, xa, xb, tol, args...; kw...)
 
   # --- Order initial root estimates correctly
   if (f1 < f0)
-    minx = x1
-    minf = f1
+    minx, minf = x1, f1
   else
-    minx = x0
-    minf = f0
+    minx, minf = x0, f0
   end
 
   # --- Iterative root calculation. Use the secant method, with Brent's method as a backup
@@ -57,8 +55,7 @@ function root_hybrid(func, xa, xb, tol, args...; kw...)
     x1 = x
     fluxvar, f1 = func(x1, args...; kw...)
     if (f1 < minf)
-      minx = x1
-      minf = f1
+      minx, minf = x1, f1
     end
 
     # If a root zone is found, use Brent's method for a robust backup strategy

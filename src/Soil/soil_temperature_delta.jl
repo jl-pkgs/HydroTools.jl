@@ -25,7 +25,7 @@ Tsoil_cur = fill(K0 + 25, n)
 df0 = -148.3184062187158
 f0 = -798.1091814317192
 
-Tsoil_next, G = soil_temperature_delta(dz, dt, κ, cv, Tsoil_cur, df0, f0)
+Tsoil_next, G = soil_temperature_delta(dz, dt, κ, cv, Tsoil_cur, df0, f0, snow_water)
 ```
 """
 function soil_temperature_delta(dz::AbstractVector, dt::Real, 
@@ -112,7 +112,7 @@ function soil_temperature_delta(dz::AbstractVector, dt::Real,
   # G_soil = f0([T_1]n) + df0 / dT * ([T_1]n + 1 - [T_1]n)
   G_soil = f0 + df0 * (Tsoil[1] - Tsoil_cur[1]) - G_snow # 一部分能量分配给融雪
 
-  Tsoil, G_soil
+  Tsoil, G_soil, G_snow
 end
 
 
