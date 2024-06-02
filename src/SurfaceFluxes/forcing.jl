@@ -44,29 +44,30 @@ Meteorological variables at reference height z:
 - `q`    : Specific humidity (kg/kg)
 - `θ`    : Potential temperature (K)
 - `θv`   : Virtual potential temperature (K)
-- `ρₐ`   : Air density (kg/m3)
-- `Mₐ`   : Molecular mass of air (kg/mol)
 - `cpₐ`  : Specific heat of air at constant pressure, (J/mol/K)
+- `M_air`: Molecular mass of air (kg/mol)
+- `ρₐ`   : Air density (kg/m3)
 - `ρ_mol`: Molar density (mol/m3)
 """
 function init_forcing(Ta, ea, Pa, z)
-  Ta += T0
+  Ta += K0
 
-  R = 8.31446         # Universal gas constant (J/K/mol)  
+  # https://github.com/jl-pkgs/bonanmodeling/blob/master/sp_07_Surface%20Energy%20Fluxes/physcon.m
   ϵ = M_h2o / M_dry
-  (; cp_w, cp_d) = physcon
+  R = 8.31446        # Universal gas constant (J/K/mol)  
+  cp_d = 1005.0      # Specific heat of `dry air` at constant pressure (J/kg/K)
+  cp_w = 1846.0      # Specific heat of `water vapor` at constant pressure (J/kg/K)
 
   θ = Ta + Γd * z # potential temperature at reference height z
   q = ea2q(ea, Pa)
 
   θv = θ * (1 + 0.61 * q) # Tv
 
-  ρ_mol = Pa / (R * Ta) # PV = nRT, p = ρ R T, 适用于任何气体
+  ρ_mol = Pa / (R * Ta) # PV = nRT, p = ρ R T, 适用于任何气体, mol m-3
   ρₐ = ρ_mol * M_dry * (1 - (1 - ϵ) * ea / Pa) # kg m-3
   M_air = ρₐ / ρ_mol # kg mol-1
   
   cpₐ = cp_d * (1 + (cp_w / cp_d - 1) * q) # [J kg-1 K-1]
-  @show cpₐ
   cpₐ = cpₐ * M_air # [J mol-1 K-1]
   return (;q, θ, θv, cpₐ, M_air, ρₐ, ρ_mol)
 end
@@ -92,4 +93,5 @@ function cal_Rs_toa(lat, doy, hour)
   return Rs_toa, Rs, Rs_dir, Rs_dif, coszen
 end
 
+export RH2ea, cal_ρ, cal_θ
 export init_forcing, cal_Rs_toa

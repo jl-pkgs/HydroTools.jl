@@ -1,3 +1,4 @@
+using HydroTools
 using Test
 
 @testset "thermal" begin

@@ -6,11 +6,6 @@ which is used in the surface temperature and flux calculation.
 
 Input
   dt                  ! Time step (s)
-  physcon.tfrz        ! Freezing point of water (K)
-  physcon.mmh2o       ! Molecular mass of water (kg/mol)
-  physcon.hvap        ! Latent heat of evaporation (J/kg)
-  physcon.hsub        ! Latent heat of sublimation (J/kg)
-  physcon.sigma       ! Stefan-Boltzmann constant (W/m2/K4)
 
   forcvar.thref       ! Potential temperature at reference height (K)
   forcvar.uref        ! Wind speed at reference height (m/s)
@@ -57,9 +52,9 @@ Input
   bucket.snow_melt    ! Snow melt (kg H2O/m2/s)
 
 ## Output from Obukhov length calculation
-  ustar       ! Friction velocity (m/s)
-  tstar       ! Temperature scale (K)
-  fluxvar.qstar       ! Water vapor scale (mol/mol)
+  u₊       ! Friction velocity (m/s)
+  t₊       ! Temperature scale (K)
+  fluxvar.q₊       ! Water vapor scale (mol/mol)
   fluxvar.obu         ! Obukhov length (m)
   fluxvar.z0m         ! RSL only: Roughness length for momentum (m)
   fluxvar.z0c         ! RSL only: Roughness length for scalars (m)
@@ -82,36 +77,34 @@ estimate of the Obukhov length (x), calculate u*, T*, and q* and then
 the new length (obu). The function value is the change in Obukhov length:
 fx = x - obu.
 """
-function most(ζ_prev, forcvar, fluxvar)
+function most(ζ, forcvar, fluxvar, param)
   k = 0.4             # von Karman constant
   g = 9.80665         # Gravitational acceleration (m/s2)
 
-  (; M_h2o) = physcon
-  
-  
-  (; u_ref, θ_ref, e_ref, Pa, z0m, z0c, z, d) = forcvar
+  (; z0m, z0c, z, d) = param
+  (; θ_ref, e_ref, u_ref, Pa_ref, M_air) = forcvar
   (; θ_surf, e_surf) = fluxvar
   # Prevent near-zero values of the Obukhov length
-  x = abs(x) <= 0.1 ? 0.1 : x
+  ζ = abs(ζ) <= 0.1 ? 0.1 : ζ
 
   # Calculate z-d at the reference height, because this is used many times
   z_minus_d = z - d
 
   # Evaluate psi for momentum at the reference height (zref-disp) and surface (z0m)
-  Ψm = -Ψ_m_monin_obukhov(z0m / x, z_minus_d / x) # Eq 6.39
-  Ψc = -Ψ_c_monin_obukhov(z0c / x, z_minus_d / x) # Eq 6.39
+  Ψm = -Ψ_m_monin_obukhov(z0m / ζ, z_minus_d / ζ) # Eq 6.39
+  Ψc = -Ψ_c_monin_obukhov(z0c / ζ, z_minus_d / ζ) # Eq 6.39
 
   zlog_m = log(z_minus_d / z0m)
   zlog_c = log(z_minus_d / z0c)
 
   # Calculate u* (m/s), T* (K), q* (mol/mol), and Tv* (K)
   u₊ = u_ref * k / (zlog_m + Ψm)                          # Eq. 6.40
-  θ₊ = (θ_ref - θ_surf) * k / (zlog_c + Ψc)               # Eq. 6.40
-  q₊ = (e_ref - e_surf) / Pa * k / (zlog_c + Ψc)          # Eq. 6.40
-  θv₊ = θ₊ + 0.61 * θ_ref * q₊ * (M_h2o / forcvar.M_air)  # Eq. 6.40
+  θ₊ = (θ_ref - θ_surf) * k / (zlog_c + Ψc)               # Eq. 6.43
+  q₊ = (e_ref - e_surf) / Pa_ref * k / (zlog_c + Ψc)          # Eq. 6.44
+  θv₊ = θ₊ + 0.61 * θ_ref * q₊ * (M_h2o / M_air)          # Eq. 6.33
 
-  ζ = u₊^2 * Th_ref / (k * g * θv₊)   # Obukhov length (m), Eq 6.30
-  return ζ_prev - ζ                   # changes
+  ζ_next = u₊^2 * θ_ref / (k * g * θv₊)  # Obukhov length (m), Eq 6.30
+  return ζ - ζ_next                       # changes
 end
 
 
@@ -131,34 +124,34 @@ function surface_fluxes(physcon, forcvar, surfvar, soilvar, fluxvar, bucket, dt)
   # ? solve for the Obukhov length
 
   (; λ_sub, λ_vap, M_h2o) = physcon
-  (; soil_water, soil_beta_max, soil_water_max) = bucket
+  (; snow_water, soil_water, soil_beta_max, soil_water_max) = bucket
   (; gcan) = surfvar
-  (; gam, gac, ustar, tstar) = fluxvar
-  (; th_ref, u_ref) = forcvar
-  (; snow_water) = bucket
+  (; gac, u₊, t₊) = fluxvar
+  (; θ_ref, e_ref, Pa_ref) = forcvar
 
   # Aerodynamic conductances for momentum (gam) and scalars (gac) (mol/m2/s)
-  gam = ρ_mol * ustar^2 / uref
-  gac = ρ_mol * ustar * tstar / (Ta_top - Ta)
+  # gam = ρ_mol * u₊^2 / uref # not used
+  gac = ρ_mol * u₊ * t₊ / (θ_ref - θ_surf) # Eq 6.7 and 6.15
   gw = 1 / (1 / gcan + 1 / gac) # Surface conductance for water vapor (mol/m2/s)
 
-  es, d_es = satvap(t_surf - K0)
-
   # Latent heat of vaporization or sublimation (J/mol)
-  λ = snow_water > 0 ? λ_sub * M_h2o : λ_vap * M_h2o # [J kg-1 * kg mol-1] = J mol-1
+  λ = snow_water > 0 ? λ_sub : λ_vap
+  λ *= M_h2o # [J kg-1 * kg mol-1] = J mol-1
 
   # Soil wetness factor for evapotranspiration
   β_soil = bucket == "no_bucket" ? 1 : min(soil_water / (soil_beta_max * soil_water_max), 1)
 
+  Ta = θ_surf
   # Emitted longwave radiation (W/m2) and temperature derivative (W/m2/K)
   LW = ϵ * σ * Ta^4
   d_LW = 4 * ϵ * σ * Ta^3
-
-  H = cp_air * (t_surf - th_ref) * gH # gH = gac
+  
+  H = cp_air * (θ_surf - θ_ref) * gH # gH = gac
   d_H = cp_air * gH
 
-  LE = λ / Pa * (es - ea) * gw * β_soil # miss a ϵ here
-  d_LE = λ / Pa * d_es * gw * β_soil
+  es, d_es = satvap(θ_surf - K0) # ! bug may here
+  LE = λ / Pa_ref * (es - e_ref) * gw * β_soil # miss a ϵ here
+  d_LE = λ / Pa_ref * d_es * gw * β_soil
 
   # Net energy flux into soil (W/m2) and temperature derivative (W/m2/K)
   f0 = Qa - LW - H - LE
@@ -185,7 +178,7 @@ function surface_fluxes(physcon, forcvar, surfvar, soilvar, fluxvar, bucket, dt)
   end
 
   ET = LE / λ # Evapotranspiration (mol H2O/m2/s), [W m-2 / (J mol-1)]
-  e_srf = (e_ref / Pa + ET / gac) * Pa
+  e_surf = (e_ref / Pa_ref + ET / gac) * Pa_ref
   # Surface vapor pressure is diagnosed from evaporative flux
   
   # Phase change for soil layers undergoing freezing of thawing
@@ -198,7 +191,7 @@ function surface_fluxes(physcon, forcvar, surfvar, soilvar, fluxvar, bucket, dt)
   # Check for energy conservation
   edif = 0
   for i in 1:nsoil
-    edif += cv[i] * dz[i] * (tsoi[i] - tsoi0[i]) / dt
+    edif += cv[i] * dz[i] * (Tsoil_next[i] - Tsoil[i]) / dt
   end
   err = edif - G_soil - hfsoi
   abs(err) > 1e-03 && error("Soil temperature energy conservation error")

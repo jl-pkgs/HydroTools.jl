@@ -135,8 +135,8 @@ function theta_wet_bolton(P0, T0, Td)
 
   ea = cal_es(Td) * 10
   r = ea2w(ea, P0)
-
   t_l = 56 + 1 / (1 / (td - 56) + log(tk / td) / 800)
+
   th_l = theta(P0 - ea, tk) * (tk / t_l)^(0.28 * r)
   Θ_se = th_l * exp(r * (1 + 0.448 * r) * (3036 / t_l - 1.78))
   (; T_lcl=t_l - K0, Θ_se=Θ_se - K0)
@@ -146,4 +146,3 @@ end
 export theta, theta_se, LCL, LCL_bolton,
   adiabat_dry_T, adiabat_dry_P,
   theta_wet, theta_wet_bolton
-export cal_θ

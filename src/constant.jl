@@ -20,8 +20,8 @@ Pa_atm = 101.325 # kPa
 Mw = 18.01528
 Md = 28.96340
 
-M_dry = 18.01528 * 1e-3 # [kg mol-1]
-M_h2o = 28.96340 * 1e-3
+M_h2o = 18.01528 * 1e-3 # [kg mol-1]
+M_dry = 28.96340 * 1e-3
 
 #' @rdname Mw
 ϵ = Mw / Md
@@ -34,14 +34,9 @@ M_h2o = 28.96340 * 1e-3
 #' of water vapor \eqn{R_w = \frac{1000R}{M_w} = 461.52J/(kg K)}.
 #' - `Rd`: Specific gas constant of dry air (J/(kg K)).
 #' @export
-R = 8.3144621 # J/(mol K)
+const R = 8.3144621 # J/(mol K)
 
-#' @rdname R
-#' @export
 Rw = R / M_h2o # ≈ 461.5 [J kg-1 K-1]
-
-#' @rdname R
-#' @export
 Rd = R / M_dry # ≈ 287.1 [J kg-1 K-1]
 
 Cp = 1.013 * 1e-3 # [MJ kg-1 K-1]
