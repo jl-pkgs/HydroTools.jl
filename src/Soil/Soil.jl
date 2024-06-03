@@ -1,5 +1,5 @@
 export soil_depth_init
-export soil_temperature, soil_thermal_properties
+export soil_temperature, soil_temperature_delta, soil_thermal_properties
 
 include("Constant.jl")
 include("soil_texture.jl")

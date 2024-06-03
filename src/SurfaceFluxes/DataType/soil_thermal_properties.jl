@@ -8,22 +8,22 @@
 ```
 
 # Return
- - `κ`: Thermal conductivity
- - `cv`: Heat capacity of soil solids (J/m3/K)  
+ - `κ`: Thermal conductivity, [W/m/K]
+ - `cv`: Heat capacity of soil solids, [J/m3/K]
 """
-function soil_thermal_properties(Tsoil, mm_liq, mm_ice, dz;
+function soil_thermal_properties!(κ, cv,
+  Tsoil, SM_liq, SM_ice, dz;
   soil_texture::Int=1, method="apparent-heat-capacity")
 
-  (; ρ_wat, ρ_ice, cv_wat, cv_ice, tk_wat, tk_ice, λ_fus) = physcon
+  (; ρ_wat, ρ_ice, cv_wat, cv_ice, tk_wat, tk_ice) = physcon
   nsoil = length(dz)
   k = soil_texture
   TFRZ = K0
-  cv_sol = 1.926e06 # Heat capacity of soil solids (J/m3/K)
+  cv_sol = 1.926 * 1e6 # Heat capacity of soil solids (J/m3/K)
 
   for i in 1:nsoil
-    # Volumetric soil water and ice
-    Θ_liq = mm_liq[i] / (ρ_wat * dz[i])  # 
-    Θ_ice = mm_ice[i] / (ρ_ice * dz[i])  # kg m-2, or mm
+    Θ_liq = SM_liq[i] / (ρ_wat * dz[i])  # [kg m-2] to [m3 m-3]
+    Θ_ice = SM_ice[i] / (ρ_ice * dz[i])  # 
     fliq = Θ_liq / (Θ_liq + Θ_ice)       # Fraction of liq
     s = min((Θ_liq + Θ_ice) / Θ_S[k], 1) # Soil water relative to saturation
 
@@ -52,7 +52,7 @@ function soil_thermal_properties(Tsoil, mm_liq, mm_ice, dz;
     end
     ke_f = s
     ke = Tsoil[i] >= TFRZ ? ke_u : ke_f
-    
+
     # Thermal conductivity (W/m/K) and unfrozen and frozen values
     κ[i] = (tksat - tk_dry) * ke + tk_dry
     κu = (tksat_u - tk_dry) * ke_u + tk_dry
@@ -72,12 +72,10 @@ function soil_thermal_properties(Tsoil, mm_liq, mm_ice, dz;
         ql = λ_fus * (ρ_wat * Θ_liq + ρ_ice * Θ_ice)
         cv[i] = (cvf + cvu) / 2 + ql / (2 * tinc)
         κ[i] = κf + (κu - κf) * (Tsoil[i] - TFRZ + tinc) / (2 * tinc)
-      elseif Tsoil[i] - TFRZ > tinc
-        # unfrozen
+      elseif Tsoil[i] - TFRZ > tinc # unfrozen
         cv[i] = cvu
         κ[i] = κu
-      elseif Tsoil[i] - TFRZ < -tinc
-        # frozen
+      elseif Tsoil[i] - TFRZ < -tinc # frozen
         cv[i] = cvf
         κ[i] = κf
       end
@@ -85,3 +83,6 @@ function soil_thermal_properties(Tsoil, mm_liq, mm_ice, dz;
   end
   κ, cv
 end
+
+
+export soil_thermal_properties!

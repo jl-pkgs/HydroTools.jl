@@ -114,6 +114,3 @@ function soil_temperature_delta(dz::AbstractVector, dt::Real,
 
   Tsoil, G_soil, G_snow
 end
-
-
-export soil_temperature_delta

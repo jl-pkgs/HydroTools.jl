@@ -89,6 +89,9 @@ for i = 1:soilvar.nsoi
   end
 end
 
+%! 注意
+% surf 与ground的定义不同，这里的surf指的时零表面
+
 % Initial surface temperature (K) and vapor pressure (Pa)
 fluxvar.tsrf = soilvar.tsoi(1);
 [esat, desat] = satvap (fluxvar.tsrf - physcon.tfrz);
@@ -138,7 +141,8 @@ for j = 1:nday
     
     % Radiative forcing: absorbed solar + incident longwave. This partitions
     % solar radiation into 50% visible and 50% near-infrared wavebands.
-    fluxvar.qa = (1-alb_eff(vis)) * 0.5*forcvar.solrad ...
+    fluxvar.qa = 
+        (1-alb_eff(vis)) * 0.5*forcvar.solrad ...
       + (1-alb_eff(nir)) * 0.5*forcvar.solrad + surfvar.emiss * forcvar.lwdown;
     
     % Canopy conductance (mol/m2/s) - use a weighted average of sunlit and shaded leaves

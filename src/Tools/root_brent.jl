@@ -4,7 +4,7 @@ between xa and xb. The root is updated until its accuracy is tol. func is the
 name of the function to solve. The variable root is returned as the root of
 the function. The function being evaluated has the definition statement: 
 
-`function [fluxvar, fx] = func (physcon, forcvar, surfvar, fluxvar, x)`
+`function [fx] = func (physcon, forcvar, surfvar, x)`
 
 The function func is evaluated at x and the returned value is fx. It uses
 variables in the physcon, forcvar, surfvar, and fluxvar structures. These are
@@ -15,12 +15,11 @@ argument. The Julia function `func` evaluates func.
 # INPUTS
 - `args...`: other arguments to be passed to `func`
 """
-function root_brent(func, xa, xb, tol, args...; kw...)
+function root_brent(func, args...; lb, ub, tol=0.01, kw...)
   # --- Evaluate func at xa and xb and make sure the root is bracketed
-  a = xa
-  b = xb
-  fluxvar, fa = func(a, args...; kw...)
-  fluxvar, fb = func(b, args...; kw...)
+  a, b = lb, ub
+  fa = func(a, args...; kw...)
+  fb = func(b, args...; kw...)
 
   if ((fa > 0 && fb > 0) || (fa < 0 && fb < 0))
     error("root_brent error: root must be bracketed")
@@ -33,6 +32,8 @@ function root_brent(func, xa, xb, tol, args...; kw...)
   c = b
   fc = fb
 
+  d = 0.0;
+  e = 0.0;
   # --- Iterative root calculation
   for iter = 1:itmax
     if ((fb > 0 && fc > 0) || (fb < 0 && fc < 0))
@@ -91,17 +92,15 @@ function root_brent(func, xa, xb, tol, args...; kw...)
         b = b - abs(tol1)
       end
     end
-    fluxvar, fb = func(b, args...; kw...)
+    fb = func(b, args...; kw...)
 
     # Check to end iteration
-    if (fb == 0)
-      break
-    end
+    fb == 0 && break
 
     # Check to see if failed to converge
     if (iter == itmax)
       error("root_brent error: Maximum number of iterations exceeded")
     end
   end
-  return fluxvar, b
+  return b
 end

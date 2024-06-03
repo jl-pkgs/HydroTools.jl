@@ -11,7 +11,6 @@ function phi_m_monin_obukhov(x)
   return phi_m
 end
 
-
 function phi_c_monin_obukhov(x::Real)
   # Evaluate the Monin-Obukhov phi function for scalars at x
   # Eq. 6.38

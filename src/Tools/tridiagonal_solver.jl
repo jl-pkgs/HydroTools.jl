@@ -52,9 +52,5 @@ function tridiagonal_solver(a::AbstractVector, b::AbstractVector, c::AbstractVec
   @inbounds for i in n-1:-1:1
     u[i] = f[i] - e[i] * u[i+1]
   end
-  
   return u
 end
-
-
-export tridiagonal_solver

@@ -7,7 +7,7 @@ using DataStructures: OrderedDict
 using DocStringExtensions: TYPEDFIELDS
 using Reexport
 
-include("Tools/tridiagonal_solver.jl")
+include("Tools/Tools.jl")
 include("GOF.jl")
 include("Optim/Optim.jl")
 
