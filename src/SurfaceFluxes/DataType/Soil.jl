@@ -64,3 +64,8 @@ function init_soil!(soil::Soil; Ts=25.0, soil_texture::Int=5)
   soil
 end
 
+
+function soil_temperature_delta(soil::Soil, df0::Real, f0::Real, snow_water::Real=0.0)
+  (; dz, dt, κ, cv, Tsoil) = soil
+  soil_temperature_delta(dz, dt, κ, cv, Tsoil, df0, f0, snow_water) # Tsoil_next, G_soil, G_snow
+end

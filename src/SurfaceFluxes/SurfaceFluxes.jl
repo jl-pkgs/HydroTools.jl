@@ -1,7 +1,7 @@
 module SurfaceFluxes
 
 using HydroTools
-using HydroTools: Γd, M_dry, M_h2o, λ_fus, λ_vap, λ_sub
+using HydroTools: Γd, λ_fus, λ_vap, λ_sub
 using HydroTools: root_hybrid, root_brent
 import HydroTools: soil_temperature_delta
 
@@ -9,6 +9,9 @@ using Parameters: @with_kw
 using DocStringExtensions
 using UnPack
 
+
+M_h2o = 18.02 * 1e-3 # [kg mol-1]
+M_dry = 28.97 * 1e-3
 
 module physcon
 # vkc    = 0.4             # von Karman constant
@@ -29,10 +32,11 @@ end
 
 include("DataType/DataType.jl")
 include("tools_met.jl")
-include("most.jl")
+include("MOST.jl")
 include("surface_fluxes.jl")
 
 export satvap
 export Soil, init_soil!
+export MOST, surface_fluxes
 
 end

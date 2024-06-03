@@ -2,6 +2,7 @@ using Test
 using HydroTools
 
 
+include("SurfaceFluxes/test-SurfaceFluxes.jl")
 include("test-thermal.jl")
 include("test-soil_moisture.jl")
 include("test-soil_temperature.jl")

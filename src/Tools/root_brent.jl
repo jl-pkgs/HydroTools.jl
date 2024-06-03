@@ -25,20 +25,16 @@ function root_brent(func, args...; lb, ub, tol=0.01, kw...)
     error("root_brent error: root must be bracketed")
   end
 
-  # --- Initialize iteration
   itmax = 50      # Maximum number of iterations
   eps1 = 1e-08    # Relative error tolerance
 
-  c = b
-  fc = fb
-
-  d = 0.0;
-  e = 0.0;
+  c, fc = b, fb
+  d = 0.0
+  e = 0.0
   # --- Iterative root calculation
   for iter = 1:itmax
     if ((fb > 0 && fc > 0) || (fb < 0 && fc < 0))
-      c = a
-      fc = fa
+      c, fc = a, fa
       d = b - a
       e = d
     end
@@ -50,9 +46,7 @@ function root_brent(func, args...; lb, ub, tol=0.01, kw...)
     xm = 0.5 * (c - b)
 
     # Check to end iteration
-    if (abs(xm) <= tol1 || fb == 0)
-      break
-    end
+    (abs(xm) <= tol1 || fb == 0) && break
 
     if (abs(e) >= tol1 && abs(fa) > abs(fb))
       s = fb / fa
@@ -81,26 +75,17 @@ function root_brent(func, args...; lb, ub, tol=0.01, kw...)
       d = xm
       e = d
     end
-    a = b
-    fa = fb
+    a, fa = b, fb
     if (abs(d) > tol1)
       b = b + d
     else
-      if (xm >= 0)
-        b = b + abs(tol1)
-      else
-        b = b - abs(tol1)
-      end
+      b = xm >= 0 ? b + abs(tol1) : b - abs(tol1)
     end
     fb = func(b, args...; kw...)
-
-    # Check to end iteration
-    fb == 0 && break
+    fb == 0 && break # Check to end iteration
 
     # Check to see if failed to converge
-    if (iter == itmax)
-      error("root_brent error: Maximum number of iterations exceeded")
-    end
+    (iter == itmax) && error("root_brent error: Maximum number of iterations exceeded")
   end
   return b
 end

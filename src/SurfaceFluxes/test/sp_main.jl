@@ -1,6 +1,15 @@
 using HydroTools
 using HydroTools.SurfaceFluxes
-# Met = HydroTools.SurfaceFluxes.Met
+using Test
+
+begin
+  z = 30.0 # Reference height (m)
+  hc = 20.0 # canopy height
+  d = 0.67 * hc # Zero-plane displacement height (m)
+  z0m = 0.13 * hc # Roughness length for momentum (m)
+  z0c = 0.10 * z0m # Roughness length for scalars (m)
+  param = (; z, d, z0m, z0c)
+end
 
 day = 1
 hour = 10
@@ -18,6 +27,14 @@ ea = es * RH / 100
 z = 30.0
 met = Met(Ta, ea, Pa, z; rain=0, snow=0, u=3.0)
 
+## Flux
+Ts = Tmean + K0
+es, d_es = satvap(Ts - K0)
+flux = Flux(; θ_surf=Ts, e_surf=es)
+
+@test MOST(10.0, met, flux; param...) ≈ -10.745758995719331
+
+
 ## Radiation and Canopy
 Θ = Ta + K0
 Rln_in = (0.398e-05 * Θ^2.148) * σ * Θ^4;
@@ -32,20 +49,10 @@ soil = Soil(dz)
 init_soil!(soil)
 soil
 
-Ts = soil.Tsoil[1]
-es, d_es = satvap(Ts - K0)
-flux = Flux(; θ_surf = Ts, e_surf = es)
+# (; z, d, z0m, z0c) = param
 
-function build_param(z::Real, hc::Real=1.0)
-  # z = 30.0, # Reference height (m)
-  d = 0.67 * hc # Zero-plane displacement height (m)
-  z0m = 0.13 * hc # Roughness length for momentum (m)
-  z0c = 0.10 * z0m # Roughness length for scalars (m)
-  (; z, hc, d, z0m, z0c)
-end
-param = build_param(20.0)
 
-surface_fluxes(met, rad, can, soil, flux; param)
+# surface_fluxes(met, rad, can, soil, flux; param)
 
 # Rainfall to equal evaporative loss (kg H2O/m2/s)
 # forcvar.rain = fluxvar.etflx * physcon.mmh2o
