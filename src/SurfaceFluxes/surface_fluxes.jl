@@ -6,7 +6,7 @@
 """
 function surface_fluxes(met::Met, rad::Radiation, can::Canopy, soil::Soil, flux::Flux;
   param, snow_water=0.0)
-  
+
   # Solve for the Obukhov length (m)
   most(x) = MOST(x, met, flux; param...)
   ζ = root_hybrid(most; tol=0.01, lb=100.0, ub=-100.0) # fill! flux; 有时这里会求解失败
@@ -57,25 +57,22 @@ function surface_fluxes(met::Met, rad::Radiation, can::Canopy, soil::Soil, flux:
   LE += d_LE * dtsrf
   Rn = Qa - LWout
 
+  # Surface vapor pressure is diagnosed from evaporative flux
+  ET = LE / λ # Evapotranspiration, [W m-2 / (J mol-1)] to [mol H2O m-2 s-1]
+  flux.e_surf = (e / Pa + ET / g_ac) * Pa  # CLM5 Tech Note 2020, Eq 5.100
+
+  # Error check
+  Ra_err = Rn - LE - H - G_soil - G_snow
+  if abs(Ra_err) > 1e-06
+    println("[e] Ra_err = $Ra_err")
+    @show (; Qa, Rn, LE, H, G_soil, G_snow)
+    error("Energy unbalance in surface_fluxes")
+  end
   @pack! flux = g_ac, Qa, LWout, Rn, LE, H, G_soil, G_snow
   flux
 end
 
 # # ea2ρ(ea) = ϵ * ea / Pa * ρₐ
-
-# # Error check
-# err = Rn - LE - H - G_soil - G_snow
-# if abs(err) > 1e-06
-#   println("err = ", err)
-#   x = (; Qa, Rn, LE, H, G_soil, G_snow)
-#   @show x
-#   error("surface temperature error")
-# end
-
-# ET = LE / λ # Evapotranspiration, [W m-2 / (J mol-1)] to [mol H2O m-2 s-1]
-# flux.e_surf = (e / Pa + ET / g_ac) * Pa
-# # Surface vapor pressure is diagnosed from evaporative flux
-
 # # Phase change for soil layers undergoing freezing of thawing
 # # if soilvar.method == "apparent-heat-capacity"
 # hfsoi = 0
@@ -90,6 +87,4 @@ end
 # end
 # err = edif - G_soil - hfsoi
 # abs(err) > 1e-03 && error("Soil temperature energy conservation error")
-
-# # Surface temperature is the first soil layer
 # # Ts = Tsoil_next[1]
