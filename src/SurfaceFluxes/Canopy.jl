@@ -21,5 +21,5 @@ coszen = cal_coszen(doy, hour, lat)
   "Sunlit fraction of canopy"
   fsun::T = (1 - exp(-kQ * LAI)) / (kQ * LAI) # 大叶模型
   "canopy conductance (mol/m2/s)"
-  gc::T = coszen <= 0.0 ? (fsun * gc_max + (1 - fsun) * gc_min) * LAI : gc_min * LAI # 冠层整体的导度
+  gc::T = coszen > 0.0 ? (fsun * gc_max + (1 - fsun) * gc_min) * LAI : gc_min * LAI # 冠层整体的导度
 end

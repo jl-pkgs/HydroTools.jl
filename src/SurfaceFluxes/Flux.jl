@@ -17,6 +17,12 @@ $(TYPEDFIELDS)
   "Aerodynamic conductances, [mol/m2/s]"
   g_ac::T = 0.0
 
+  "Rs(1 - α) + LW_in, [W m-2]"
+  Qa::T = T(NaN)
+  "outward longwave radiation (W m-2)"
+  LWout::T = T(NaN)
+  "Net radiation, [W m-2]"
+  Rn::T = T(NaN)
   "Latent heat flux (W m-2)"
   LE::T = 0.0
   "Sensible heat flux (W m-2)"

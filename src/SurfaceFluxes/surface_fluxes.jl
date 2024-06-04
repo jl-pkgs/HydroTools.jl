@@ -5,14 +5,11 @@
   + `rsl`: Roughness sublayer theory
 """
 function surface_fluxes(met::Met, rad::Radiation, can::Canopy, soil::Soil, flux::Flux;
-  param, snow_water=0.0, dt=1800.0)
-
+  param, snow_water=0.0)
+  
   # Solve for the Obukhov length (m)
-  function _most(ζ)
-    (; z, d, z0m, z0c) = param
-    MOST(ζ, met, flux; z, d, z0m, z0c) # δζ
-  end
-  ζ = root_hybrid(_most; tol=0.01, lb=100.0, ub=-100.0)
+  most(x) = MOST(x, met, flux; param...)
+  ζ = root_hybrid(most; tol=0.01, lb=100.0, ub=-100.0) # fill! flux; 有时这里会求解失败
 
   # (; snow_water, soil_water, soil_beta_max, soil_water_max) = bucket
   (; θ, e, Pa, ρ_mol, cpₐ) = met
@@ -36,8 +33,8 @@ function surface_fluxes(met::Met, rad::Radiation, can::Canopy, soil::Soil, flux:
 
   Ts = θ_surf
   # Emitted longwave radiation (W/m2) and temperature derivative (W/m2/K)
-  LW = ϵ * σ * Ts^4
-  d_LW = 4 * ϵ * σ * Ts^3
+  LWout = ϵ * σ * Ts^4 # 向外的部分
+  d_LWout = 4 * ϵ * σ * Ts^3
 
   H = cpₐ * (θ_surf - θ) * g_ac # gH = g_ac
   d_H = cpₐ * g_ac
@@ -47,22 +44,21 @@ function surface_fluxes(met::Met, rad::Radiation, can::Canopy, soil::Soil, flux:
   d_LE = λ / Pa * d_es * gw * β_soil
 
   # Net energy flux into soil (W/m2) and temperature derivative (W/m2/K)
-  f0 = Qa - LW - H - LE
-  df0 = -d_LW - d_H - d_LE
+  f0 = Qa - LWout - H - LE
+  df0 = -d_LWout - d_H - d_LE
 
   # solve Tsoil_next
   Tsoil_next, G_soil, G_snow = soil_temperature_delta(soil, df0, f0, snow_water)
 
   # Update surface fluxes for the change in surface temperature
   dtsrf = Tsoil_next[1] - Tsoil[1]
-  LW += d_LW * dtsrf
+  LWout += d_LWout * dtsrf
   H += d_H * dtsrf
   LE += d_LE * dtsrf
-  Rn = Qa - LW
+  Rn = Qa - LWout
 
-  @pack! flux = g_ac, LE, H, G_soil, G_snow
-  x = (; Qa, Rn, LE, H, G_soil, G_snow)
-  @show x
+  @pack! flux = g_ac, Qa, LWout, Rn, LE, H, G_soil, G_snow
+  flux
 end
 
 # # ea2ρ(ea) = ϵ * ea / Pa * ρₐ

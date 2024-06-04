@@ -27,14 +27,22 @@ cv_wat = cp_wat * ρ_wat  # Heat capacity of water (J/m3/K)
 cv_ice = cp_ice * ρ_ice  # Heat capacity of ice (J/m3/K)
 tk_wat = 0.57            # Thermal conductivity of water (W/m/K)
 tk_ice = 2.29            # Thermal conductivity of ice (W/m/K)
-
 end
 
-include("DataType/DataType.jl")
+# using ProtoStructs
+include("Met.jl")
+include("Radiation.jl")
+include("Canopy.jl")
+include("Flux.jl")
+include("soil_thermal_properties.jl")
+include("Soil.jl")
+# 三个高度：ref, surf, ground：参考高度，0表面，
 include("tools_met.jl")
 include("MOST.jl")
 include("surface_fluxes.jl")
 
+export Met, Radiation, Canopy, Soil, Flux
+export cal_coszen
 export satvap
 export Soil, init_soil!
 export MOST, surface_fluxes

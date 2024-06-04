@@ -11,26 +11,28 @@ begin
   param = (; z, d, z0m, z0c)
 end
 
-day = 1
-hour = 10
-lat = 40.0 * pi / 180  # Latitude (degrees -> radians) for solar radiation
-dt = 1800 # second
+begin
+  day = 182
+  hour = 10
+  lat = 40.0 * pi / 180  # Latitude (degrees -> radians) for solar radiation
+  dt = 1800 # second
 
-## Meteorological forcing 
-# Ta = 20.0
-Tmean = 25.0
-Ta = gen_Ta(hour)  # Air temperature (C)
-RH = 70.0  # Relative humidity (%)
-Pa = atm * 1e3
-es, d_es = satvap(Ta) # Pa
-ea = es * RH / 100
-z = 30.0
-met = Met(Ta, ea, Pa, z; rain=0, snow=0, u=3.0)
+  ## Meteorological forcing 
+  # Ta = 20.0
+  Tmean = 25.0
+  Ta = gen_Ta(hour)  # Air temperature (C)
+  RH = 70.0  # Relative humidity (%)
+  Pa = atm * 1e3
+  es, d_es = satvap(Ta) # Pa
+  ea = es * RH / 100
+  z = 30.0
+  met = Met(Ta, ea, Pa, z; rain=0, snow=0, u=3.0)
 
-## Flux
-Ts = Tmean + K0
-es, d_es = satvap(Ts - K0)
-flux = Flux(; θ_surf=Ts, e_surf=es)
+  ## Flux
+  Ts = Tmean + K0
+  es, d_es = satvap(Ts - K0)
+  flux = Flux{Float64}(; θ_surf=Ts, e_surf=es)
+end
 
 @testset "MOST" begin
   @test MOST(10.0, met, flux; param...) ≈ -10.745758995719331  
