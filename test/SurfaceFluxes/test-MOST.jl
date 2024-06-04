@@ -34,4 +34,11 @@ flux = Flux(; θ_surf=Ts, e_surf=es)
 
 @testset "MOST" begin
   @test MOST(10.0, met, flux; param...) ≈ -10.745758995719331  
+
+  most(x) = MOST(x, met, flux; param...)
+  ζ1 = root_hybrid(most; tol=0.01, lb=-100.0, ub=100.0) # 100.98195098560592
+  @test ζ1 ≈ 100.98195098560592
+
+  ζ2 = root_hybrid(most; tol=0.01, lb=100.0, ub=-100.0) # 100.98045493428528
+  @test ζ2 ≈ 100.98045493428528
 end

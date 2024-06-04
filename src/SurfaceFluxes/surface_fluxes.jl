@@ -13,7 +13,6 @@ function surface_fluxes(met::Met, rad::Radiation, can::Canopy, soil::Soil, flux:
     MOST(ζ, met, flux; z, d, z0m, z0c) # δζ
   end
   ζ = root_hybrid(_most; tol=0.01, lb=100.0, ub=-100.0)
-  @show ζ
 
   # (; snow_water, soil_water, soil_beta_max, soil_water_max) = bucket
   (; θ, e, Pa, ρ_mol, cpₐ) = met

@@ -16,13 +16,12 @@ argument. The Julia function `func` evaluates func.
 - `args...`: other arguments to be passed to `func`
 - `tol`: accuracy tolerance for x
 """
-function root_hybrid(func, args...; lb::Real, ub::Real, tol=0.01, kw...)
-  # --- Evaluate func at xa and see if this is the root
+function root_hybrid(func, args...; lb::Real, ub::Real, tol=0.01, itmax = 40, kw...)
+  # --- Evaluate func at `xa` and `xb` and see if this is the root
   x0 = lb
   f0 = func(x0, args...; kw...)
   (f0 == 0) && return x0
   
-  # --- Evaluate func at xb and see if this is the root
   x1 = ub
   f1 = func(x1, args...; kw...)
   (f1 == 0) && return x1
@@ -35,7 +34,6 @@ function root_hybrid(func, args...; lb::Real, ub::Real, tol=0.01, kw...)
   end
 
   # --- Iterative root calculation. Use the secant method, with Brent's method as a backup
-  itmax = 40
   for iter = 1:itmax
     dx = -f1 * (x1 - x0) / (f1 - f0)
     x = x1 + dx
@@ -47,8 +45,7 @@ function root_hybrid(func, args...; lb::Real, ub::Real, tol=0.01, kw...)
     end
 
     # Evaluate the function at x
-    x0 = x1
-    f0 = f1
+    x0, f0 = x1, f1
     x1 = x
     f1 = func(x1, args...; kw...)
     if (f1 < minf)

@@ -15,7 +15,7 @@ argument. The Julia function `func` evaluates func.
 # INPUTS
 - `args...`: other arguments to be passed to `func`
 """
-function root_brent(func, args...; lb, ub, tol=0.01, kw...)
+function root_brent(func, args...; lb, ub, tol=0.01, itmax=50, kw...)
   # --- Evaluate func at xa and xb and make sure the root is bracketed
   a, b = lb, ub
   fa = func(a, args...; kw...)
@@ -25,7 +25,6 @@ function root_brent(func, args...; lb, ub, tol=0.01, kw...)
     error("root_brent error: root must be bracketed")
   end
 
-  itmax = 50      # Maximum number of iterations
   eps1 = 1e-08    # Relative error tolerance
 
   c, fc = b, fb
