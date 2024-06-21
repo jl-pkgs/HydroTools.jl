@@ -1,3 +1,20 @@
+# 相同植被类型多个站点一起的计算
+function PMLV2_sites(df::AbstractDataFrame; par::Param_PMLV2=Param_PMLV2(), kw...)
+  sites = df.site
+  grps = unique(sites)
+
+  # ! 这里有优化空间，但程序会写的很复杂
+  res = []
+  for grp in grps
+    inds = sites .== grp
+    d = df[inds, :]
+    r = PMLV2(d; par, kw...)
+    push!(res, r)
+  end
+  vcat(res...)
+end
+
+
 """
     PMLV2(Prcp, Tavg, Rs, Rn, VPD, U2, LAI, Pa, Ca; par=param0, frame=3)
 
@@ -22,7 +39,7 @@ function PMLV2(Prcp::V, Tavg::V, Rs::V, Rn::V,
   isvec_Ca = isa(Ca, AbstractVector)
   @inbounds for t = 1:n
     _Ca = isvec_Ca ? Ca[t] : Ca
-    
+
     PMLV2(Prcp[t], Tavg[t], Rs[t], Rn[t], VPD[t], U2[t], LAI[t], Pa[t], 
       _Ca; par, r)
     res[t, fields] = r
@@ -208,4 +225,5 @@ function cal_Ei_Dijk2021(Prcp::T, LAI::T, par::Param_PMLV2) where {T<:Real}
 end
 
 
+export PMLV2_sites
 export PMLV2, T_adjust_Vm25, f_VPD_Zhang2019
