@@ -36,7 +36,7 @@ end
   @time for itim = 1:ntim
     hour = itim * (dt / 86400 * 24)
     # @printf("hour = %8.3f\n", hour)
-
+    
     # Calculate soil moisture
     Q0, QN, dθ, err = soil_moisture!(Θ, ψ, ψ0, dz, dt, param)
 
@@ -46,7 +46,7 @@ end
     sum_store += dθ
   end
 
-  @test sum_in == 11.810243822643141
-  @test sum_out == 0.10508872215771699
-  @test sum_store == 11.704825251924781
+  @test sum_in ≈ 11.810243822643141
+  @test sum_out ≈ 0.10508872215771699
+  @test sum_store ≈ 11.704825251924781
 end

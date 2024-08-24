@@ -1,7 +1,7 @@
 using UnPack
 
-include("Cambell.jl")
-include("van_Genuchten.jl")
+include("ψ_Cambell.jl")
+include("ψ_van_Genuchten.jl")
 
 export Cambell, van_Genuchten
 export matric_potential, HydraulicConductivity
