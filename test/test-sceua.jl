@@ -4,7 +4,7 @@ using Test
 kw = (; maxn=1e4, kstop=10, pcento=0.1, peps=0.001, iseed=1, iniflg=0)
 
 @testset "functn1" begin
-  function functn1(x)
+  function functn1(x::Vector{Float32})
     # This is the Goldstein - Price Function
     # Bound X1 = [-2, 2], X2 = [-2, 2]
     # Global Optimum:3.0, (0.0, -1.0)
@@ -19,12 +19,12 @@ kw = (; maxn=1e4, kstop=10, pcento=0.1, peps=0.001, iseed=1, iniflg=0)
     (1 .+ u5) * (30 .+ u6)
   end
 
-  bl = [-2, -2]
-  bu = [2, 2]
-  x0 = [1, 1]
+  bl = Float32.([-2, -2])
+  bu = Float32.([2, 2])
+  x0 = Float32.([1, 1])
 
-  x, feval, exitflag = sceua(functn1, x0, bl, bu; maxn=2000)
-  @test abs(feval - 3) <= 1e-6
+  @time x, feval, exitflag = sceua(functn1, x0, bl, bu; maxn=2000)
+  @test abs(feval - 3) <= 1e-4
 end
 
 @testset "functn2" begin
@@ -39,9 +39,9 @@ end
     a * (x2 - x1^2)^2 + (1 - x1)^2
   end
 
-  bl = [-5, -5]
-  bu = [5, 5]
-  x0 = [-1, 1]
+  bl = [-5.0, -5]
+  bu = [5.0, 5]
+  x0 = [-1.0, 1]
   x, feval, exitflag = sceua(functn2, x0, bl, bu; kw...)
   # @show x, feval
   @test abs(feval - 0) <= 1e-6
@@ -56,8 +56,8 @@ end
     x2 = x[2]
     (4 - 2.1 * x1^2 + x1^4 / 3) * x1^2 + x1 * x2 + (-4 + 4 * x2^2) * x2^2
   end
-  bl = [-5, -2]
-  bu = [5, 8]
+  bl = [-5.0, -2]
+  bu = [5.0, 8]
   x0 = [-0.08983, 0.7126]
   x, feval, exitflag = sceua(functn3, x0, bl, bu)
 
@@ -75,9 +75,9 @@ end
     x1^2 + x2^2 - cos(18.0 * x1) - cos(18.0 * x2)
   end
 
-  bl = [-1, -1]
-  bu = [1, 1]
-  x0 = [-1, -1]
+  bl = [-1.0, -1]
+  bu = [1.0, 1]
+  x0 = [-1.0, -1]
 
   x, feval, exitflag = sceua(functn4, x0, bl, bu; kw...)
   @test abs(feval - (-2)) <= 1e-3
@@ -101,8 +101,8 @@ end
     end
     u1 - u2 + 1
   end
-  bl = -600 * ones(10)
-  bu = 600 * ones(10)
+  bl = -600.0 * ones(10)
+  bu = 600.0 * ones(10)
   x0 = ones(10) * -1.0
   x, feval, exitflag = sceua(functn5, x0, bl, bu; kw...)
   @test abs(feval - 0) <= 1e-6
@@ -136,10 +136,9 @@ end
   end
 
   bl = zeros(4)
-  bu = 10 * ones(4)
-  x0 = [4, 4, 4, 3.0]
+  bu = 10.0 * ones(4)
+  x0 = [4.0, 4, 4, 3.0]
 
   x, feval, exitflag = sceua(functn6, x0, bl, bu; maxn=1e4)
   @test abs(feval - -10.5364098252) <= 1e-5
 end
-

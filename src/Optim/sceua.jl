@@ -11,9 +11,9 @@
 x, feval, exitflag, output = sceua(fn, x0, bl, bu)
 ```
 """
-function sceua(fn::Function, x0::Vector, bl::Vector, bu::Vector;
+function sceua(fn::Function, x0::Vector{FT}, bl::Vector{FT}, bu::Vector{FT};
   verbose=false,
-  maxn=1000, kstop=5, pcento=0.01, peps=0.0001, ngs=5, iseed=1, iniflg=1)
+  maxn=1000, kstop=5, pcento=0.01, peps=0.0001, ngs=5, iseed=1, iniflg=1) where {FT<:Real}
   ## This is the subroutine implementing the SCE algorithm
   # written by Q.Duan; 9/2004
   #
@@ -96,7 +96,7 @@ function sceua(fn::Function, x0::Vector, bl::Vector, bu::Vector;
   bound = bu - bl
   # Create an initial population to fill array x[npt,nopt]:
 
-  x = zeros(npt, nopt)
+  x = zeros(FT, npt, nopt)
   for i = 1:npt
     # x[i, :] = bl + rand(nopt) .* bound
     x[i, :] = bl + mrand(nopt) .* bound
@@ -105,7 +105,7 @@ function sceua(fn::Function, x0::Vector, bl::Vector, bu::Vector;
   iniflg == 1 && (x[1, :] = x0)
 
   icall = 0
-  xf = zeros(npt)
+  xf = zeros(FT, npt)
   for i = 1:npt
     xf[i] = fn(x[i, :]) # nopt
     icall += 1
@@ -186,7 +186,7 @@ function sceua(fn::Function, x0::Vector, bl::Vector, bu::Vector;
         end
         lcs = sort(lcs)
         # Construct the simplex:
-        s = zeros(nps, nopt)
+        s = zeros(FT, nps, nopt)
         s = cx[lcs, :]
         sf = cf[lcs]
 
@@ -261,6 +261,6 @@ function sceua(fn::Function, x0::Vector, bl::Vector, bu::Vector;
     @printf("Search was stopped at trial number: %d \n", icall)
     println("Normalized geometric range = $(num2str(gnrng))")
     println("The best point has improved in last $(num2str(kstop)) LOOPS BY $(num2str(criter_change))")
-end
+  end
   bestx, bestf, exitflag
 end
