@@ -2,6 +2,13 @@ using HydroTools
 using Test
 
 
+@testset "face and center" begin
+  dz = [2, 4, 8, 10]
+  z, z₊ₕ, dz₊ₕ = soil_depth_init(dz)
+  @test F2C(z₊ₕ) == z
+  @test C2F(z) == z₊ₕ
+end
+
 @testset "Cambell" begin
   param = (Θ_sat=0.25, ψ_sat=-25.0, b=0.2, K_sat=3.4e-03)
   Θ, K, ∂Θ∂ψ = Cambell(-100; param)
