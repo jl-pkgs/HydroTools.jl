@@ -38,3 +38,20 @@ end
   r = cal_Rn(20.0, 20, 20.0, 25.0, 2.0, 10.0) # default unit is W m-2
   @test W2MJ(r) ≈ 9.91692555
 end
+
+## 二者计算结果接近，但存在误差，主要由于是日落时间的不准。
+@testset "cal_Rsi_toa_hour" begin
+  lat = 30.0
+  J = 30
+  r1 = sum(cal_Rsi_toa_hour.(0:23; lat, J))
+  r2 = cal_Rsi_toa(lat, J)
+  @test (r2 - r1) / r2 < 0.01
+end
+
+# # Rn的理论变化日内
+# begin
+#   using Plots
+#   hours = 0:23
+#   Rs_toa = cal_Rsi_toa_hour.(hours; lat, J)
+#   plot(hours, Rs_toa)
+# end
