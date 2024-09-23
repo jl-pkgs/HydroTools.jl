@@ -26,12 +26,12 @@ MJ2mm(x::Real) = x / 2.45
 W2MJ(x::Real) = x * 0.0864
 
 function W2mm(x::Real, Tair::Real)
-  lamada = 2500 - 2.2 * Tair
-  return x / lamada * 86400 * 1e-3  # W M⁻² to mm
+  lamada = 2500 - 2.2 * Tair # J g-1
+  return x / lamada * 86400 / 1000  # W m⁻² to mm
 end
 
 # lambda: [MJ kg-1]
-W2mm(Ra; λ) = Ra * 0.086400 / λ
+W2mm(Ra; λ) = Ra * 86400 / 1_000_000 / λ
 
 
 """
