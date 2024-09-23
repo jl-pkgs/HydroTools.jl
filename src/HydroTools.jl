@@ -17,7 +17,7 @@ include("constant.jl")
 include("cal_humidity.jl")
 include("thermal.jl")
 
-include("ET/ET.jl")
+include("PET/PET.jl")
 include("unit_convert.jl")
 include("Radiation/Radiation.jl")
 include("Soil/Soil.jl")

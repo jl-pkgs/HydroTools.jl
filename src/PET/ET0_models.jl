@@ -33,10 +33,7 @@ function ET0_eq(Rn::T, Tair::T, Pa::T=atm, args...) where {T<:Real}
   λ::T = cal_lambda(Tair) # MJ kg-1
   Δ::T = cal_slope(Tair) # kPa degC-1
   γ::T = Cp * Pa / (ϵ * λ) # kPa degC-1
-
-  coef_W2mm::T = 0.086400 / λ
-  Eeq::T = Δ / (Δ + γ) * Rn * coef_W2mm
-
+  Eeq::T = Δ / (Δ + γ) * Rn |> x -> W2mm(x; λ)
   λ, Δ, γ, Eeq
 end
 
@@ -83,11 +80,9 @@ function ET0_FAO98(Rn::T, Tair::T, VPD::T, wind::T, Pa::T=atm; z_wind=2, tall_cr
     p1 = T(900.0)
     p2 = T(0.34)
   end
-
   λ, Δ, γ, Eeq = ET0_eq(Rn, Tair, Pa)
-  coef_W2mm::T = 0.086400 / λ
 
-  Eeq::T = Δ / (Δ + (γ * (1.0 + p2 * U2))) * Rn * coef_W2mm
+  Eeq::T = Δ / (Δ + (γ * (1.0 + p2 * U2))) * Rn |> x -> W2mm(x; λ)
   Evp::T = γ * p1 / (Tair + 273.15) * U2 * VPD / (Δ + (γ * (1.0 + p2 * U2)))
 
   PET::T = Eeq + Evp

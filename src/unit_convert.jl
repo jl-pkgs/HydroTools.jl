@@ -31,7 +31,7 @@ function W2mm(x::Real, Tair::Real)
 end
 
 # lambda: [MJ kg-1]
-W2mm(Ra; lambda) = Ra * 86400 / 1e6 / lambda
+W2mm(Ra; λ) = Ra * 0.086400 / λ
 
 
 """
