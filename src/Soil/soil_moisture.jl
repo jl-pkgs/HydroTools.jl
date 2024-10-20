@@ -22,7 +22,7 @@ export soil_moisture!
 
 # TODO: 
 - 加入sink相：体现蒸发`E`和入渗`I`的影响（I的影响，主要发生在前两层）
-- 研究`ψ0`如何设置
+- `ψ0`: 已知Q0，可以求得ψ0, Eq. 8.25
 - 更新每一层的土壤深度
 
 # Example
@@ -30,7 +30,7 @@ export soil_moisture!
 soil_moisture!(Θ, ψ, ψ0, dz, dt, param)
 ```
 """
-function soil_moisture!(θ, ψ, ψ0, dz, dt, param; fun=van_Genuchten)
+function soil_moisture!(θ, ψ, ψ0, dz, dt, param; Q0=nothing, fun=van_Genuchten)
   z, z₊ₕ, dz₊ₕ = soil_depth_init(dz)
   n = length(dz)
 
@@ -47,13 +47,14 @@ function soil_moisture!(θ, ψ, ψ0, dz, dt, param; fun=van_Genuchten)
   for i in 1:n
     θ[i], K[i], Cap[i] = fun(ψ[i]; param)
   end
-  
+
   for i = 1:n-1
     K₊ₕ[i] = (K[i] + K[i+1]) / 2 # can be improved, weighted by z
   end
 
   K0₊ₕ = K[1]
   dz0₊ₕ = 0.5 * dz[1]
+  !isnothing(Q0) && (ψ0 = -(Q0 / K0₊ₕ + 1) * dz0₊ₕ + ψ[1]) # Eq. 8.25
 
   a = zeros(n)
   c = zeros(n)
@@ -88,7 +89,8 @@ function soil_moisture!(θ, ψ, ψ0, dz, dt, param; fun=van_Genuchten)
     K₊ₕ[i] = (K[i] + K[i+1]) / 2 # can be improved, weighted by z
   end
   K0₊ₕ = K[1] # 可以按照同样的方法，设置
-  
+  !isnothing(Q0) && (ψ0 = -(Q0 / K0₊ₕ + 1) * dz0₊ₕ + ψ[1]) # Eq. 8.25
+
   ## second round
   # Terms for tridiagonal matrix
   @inbounds for i = 1:n
