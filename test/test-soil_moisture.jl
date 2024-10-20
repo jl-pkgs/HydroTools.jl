@@ -1,5 +1,4 @@
-using HydroTools
-using Test
+using HydroTools, Test
 
 
 @testset "face and center" begin

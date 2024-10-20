@@ -2,9 +2,7 @@ export soil_moisture!
 
 # TODO: 
 # - ψ0没有参与更新，要如何解决？
-# - 下渗，Q0
 # - 添加一个结构体，保存中间变量，节省内存
-
 
 """
     soil_moisture!(θ, ψ, ψ0, dz, dt, param; fun=van_Genuchten)
@@ -20,23 +18,34 @@ export soil_moisture!
 θ, K, Cap -> ψ
 ```
 
+## Arguments
+- `θ`     : [m3 m-3]
+- `ψ`     : [cm]，为负，约干约负
+- `ψ0`    : 已知Q0，可以求得ψ0, Eq. 8.25
+- `dz`    : [cm]
+- `dt`    : [s]
+- `param` : 参数
+
+- `sink`  : 蒸发项，[cm s-1]
+- `Q0`    : 下渗，[cm s-1]
+
 # TODO: 
-- 加入sink相：体现蒸发`E`和入渗`I`的影响（I的影响，主要发生在前两层）
-- `ψ0`: 已知Q0，可以求得ψ0, Eq. 8.25
-- 更新每一层的土壤深度
+1. 加入sink相：体现蒸发`E`和入渗`I`的影响（I的影响，主要发生在前两层）
+2. 更新每一层的土壤深度
 
 # Example
 ```julia
 soil_moisture!(Θ, ψ, ψ0, dz, dt, param)
 ```
 """
-function soil_moisture!(θ, ψ, ψ0, dz, dt, param; Q0=nothing, fun=van_Genuchten)
+function soil_moisture!(θ, ψ, ψ0, dz, dt, param; sink=nothing, Q0=nothing, fun=van_Genuchten)
   z, z₊ₕ, dz₊ₕ = soil_depth_init(dz)
   n = length(dz)
 
   # a deep copy
   θ_n = deepcopy(θ)
   ψ_n = deepcopy(ψ)
+  isnothing(sink) && (sink = zeros(n))
 
   # θ = zeros(n)
   K = zeros(n)
@@ -78,6 +87,7 @@ function soil_moisture!(θ, ψ, ψ0, dz, dt, param; Q0=nothing, fun=van_Genuchte
       b[i] = Cap[i] * dz[i] / (0.5 * dt) - a[i] - c[i]
       d[i] = Cap[i] * dz[i] / (0.5 * dt) * ψ[i] + K₊ₕ[n-1] - K[i]
     end
+    d[i] -= sink[i]
   end
   ψ_pred .= tridiagonal_solver(a, b, c, d) # Solve for ψ at n+1/2 time
 
@@ -114,6 +124,7 @@ function soil_moisture!(θ, ψ, ψ0, dz, dt, param; Q0=nothing, fun=van_Genuchte
       b[i] = Cap[i] * dz[i] / dt - a[i] - c[i]
       d[i] = Cap[i] * dz[i] / dt * ψ[i] - a[i] * (ψ[i-1] - ψ[i]) + K₊ₕ[i-1] - K[i]
     end
+    d[i] -= sink[i]
   end
   ψ .= tridiagonal_solver(a, b, c, d) # Solve for ψ at n+1
 
