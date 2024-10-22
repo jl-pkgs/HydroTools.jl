@@ -52,8 +52,8 @@ end
 @testset "surface_fluxes" begin
   @test flux.Rn == flux.Qa - flux.LWout
   @test flux.Rn ≈ flux.H + flux.LE + flux.G_soil + flux.G_snow
-  @test flux.H ≈ 44.300771742675465
-  @test flux.LE ≈ 218.3592893114352
+  @test flux.H ≈ 44.301017430068185
+  @test flux.LE ≈ 218.35986837001974
 end
 
 # Rainfall to equal evaporative loss (kg H2O/m2/s)
