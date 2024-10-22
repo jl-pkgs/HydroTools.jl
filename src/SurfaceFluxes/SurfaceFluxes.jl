@@ -45,6 +45,6 @@ export Met, Radiation, Canopy, Soil, Flux
 export cal_coszen
 export satvap
 export Soil, init_soil!
-export MOST, surface_fluxes
+export MOST, surface_fluxes!
 
 end

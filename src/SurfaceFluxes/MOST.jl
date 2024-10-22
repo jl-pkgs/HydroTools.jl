@@ -1,3 +1,5 @@
+export _MOST, MOST!, MOST
+
 """
 Use Monin-Obukhov Similarity Theory (MOST) to obtain the Obukhov length (ζ).
 
@@ -11,7 +13,7 @@ fx = x - obu.
 δζ = MOST(ζ, met, flux; z, d, z0m, z0c)
 ```
 """
-function MOST(ζ0, met::Met, flux::Flux; z::Real, d::Real, z0m::Real, z0c::Real)
+function MOST(flux::Flux, met::Met, ζ0::FT; z::FT, d::FT, z0m::FT, z0c::FT) where {FT<:Real}
   k = 0.4             # von Karman constant
   g = 9.80665         # Gravitational acceleration (m/s2)
   # (; z0m, z0c, z, d) = param
@@ -33,9 +35,22 @@ function MOST(ζ0, met::Met, flux::Flux; z::Real, d::Real, z0m::Real, z0c::Real)
   q₊ = (e - e_surf) / Pa * k / (zlog_c + Ψc)          # Eq. 6.44
   θv₊ = θ₊ + 0.61 * θ * q₊ * (M_h2o / M_air)          # Eq. 6.33
 
-  ζ = u₊^2 * θv / (k * g * θv₊)                        # Eq. 6.30
-  @pack! flux = u₊, θ₊, q₊, ζ
-  return ζ0 - ζ # dζ
+  ζ = u₊^2 * θv / (k * g * θv₊)                       # Eq. 6.30
+  # @pack! flux = ζ, u₊, θ₊, q₊ # TODO
+  return ζ, u₊, θ₊, q₊
+end
+
+"update u₊, θ₊, q₊"
+function MOST!(flux::Flux, met::Met, ζ0::FT; z::FT, d::FT, z0m::FT, z0c::FT) where {FT<:Real}
+  ζ, u₊, θ₊, q₊ = MOST(flux, met, ζ0; z, d, z0m, z0c)
+  @pack! flux = u₊, θ₊, q₊
+  flux.ζ = ζ0
+  flux
+end
+
+function _MOST(flux::Flux, met::Met, ζ0::FT; z::FT, d::FT, z0m::FT, z0c::FT) where {FT<:Real}
+  ζ, u₊, θ₊, q₊ = MOST(flux, met, ζ0; z, d, z0m, z0c)
+  return ζ0 - ζ
 end
 
 # ϕ: phi

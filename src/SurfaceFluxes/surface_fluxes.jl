@@ -4,12 +4,13 @@
   + `most`: Monin-Obukhov similarity theory
   + `rsl`: Roughness sublayer theory
 """
-function surface_fluxes(met::Met, rad::Radiation, can::Canopy, soil::Soil, flux::Flux;
+function surface_fluxes!(flux::Flux, met::Met, rad::Radiation, can::Canopy, soil::Soil;
   param, snow_water=0.0)
 
   # Solve for the Obukhov length (m)
-  most(x) = MOST(x, met, flux; param...)
-  ζ = root_hybrid(most; tol=0.01, lb=100.0, ub=-100.0) # fill! flux; 有时这里会求解失败
+  most(x) = _MOST(flux, met, x; param...) # goal function
+  ζ = root_hybrid(most; tol=0.001, lb=100.0, ub=-100.0) # fill! flux; 有时这里会求解失败
+  MOST!(flux, met, ζ; param...) # fill! flux
 
   # (; snow_water, soil_water, soil_beta_max, soil_water_max) = bucket
   (; θ, e, Pa, ρ_mol, cpₐ) = met
@@ -69,6 +70,8 @@ function surface_fluxes(met::Met, rad::Radiation, can::Canopy, soil::Soil, flux:
     error("Energy unbalance in surface_fluxes")
   end
   @pack! flux = g_ac, Qa, LWout, Rn, LE, H, G_soil, G_snow
+  flux.θ_surf = Tsoil_next[1]
+  Tsoil .= Tsoil_next
   flux
 end
 

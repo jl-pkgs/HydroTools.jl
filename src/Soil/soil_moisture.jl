@@ -107,9 +107,9 @@ function soil_moisture!(θ, ψ, ψ0, dz, dt, param; sink=nothing, Q0=nothing, fu
     if i == 1
       a[i] = 0
       c[i] = -K₊ₕ[i] / (2 * dz₊ₕ[i])
-      b[i] = Cap[i] * dz[i] / dt + K0₊ₕ / (2 * dz0₊ₕ) - c[i]
-      d[i] = Cap[i] * dz[i] / dt * ψ[i] + K0₊ₕ / (2 * dz0₊ₕ) * ψ0 +
-             K0₊ₕ / (2 * dz0₊ₕ) * (ψ0 - ψ[i]) +
+      b[i] = Cap[i] * dz[i] / dt - c[i] + K0₊ₕ / (2 * dz0₊ₕ)
+      d[i] = Cap[i] * dz[i] / dt * ψ[i] +
+             K0₊ₕ / (2 * dz0₊ₕ) * (2ψ0 - ψ[i]) +
              c[i] * (ψ[i] - ψ[i+1]) + K0₊ₕ - K₊ₕ[i]
     elseif i < n
       a[i] = -K₊ₕ[i-1] / (2 * dz₊ₕ[i-1])

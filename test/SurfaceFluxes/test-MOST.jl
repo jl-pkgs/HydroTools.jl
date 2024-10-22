@@ -35,9 +35,9 @@ begin
 end
 
 @testset "MOST" begin
-  @test MOST(10.0, met, flux; param...) ≈ -10.745758995719331  
+  @test _MOST(flux, met, 10.0; param...) ≈ -10.745758995719331  
 
-  most(x) = MOST(x, met, flux; param...)
+  most(x) = _MOST(flux, met, x; param...)
   ζ1 = root_hybrid(most; tol=0.01, lb=-100.0, ub=100.0) # 100.98195098560592
   @test ζ1 ≈ 100.98195098560592
 

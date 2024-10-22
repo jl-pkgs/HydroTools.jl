@@ -1,6 +1,5 @@
-using HydroTools
+using HydroTools, Test
 using HydroTools.SurfaceFluxes
-using Test
 
 begin
   z = 30.0 # Reference height (m)
@@ -13,7 +12,8 @@ end
 
 begin
   day = 182
-  hour = 10
+  j = 20
+  hour = j * dt / 86400 * 24
   lat = 40.0 * pi / 180  # Latitude (degrees -> radians) for solar radiation
   dt = 1800 # second
 
@@ -46,10 +46,10 @@ begin
   soil = Soil(dz)
   init_soil!(soil)
   soil
+  surface_fluxes!(flux, met, rad, can, soil; param)
 end
 
 @testset "surface_fluxes" begin
-  surface_fluxes(met, rad, can, soil, flux; param)
   @test flux.Rn == flux.Qa - flux.LWout
   @test flux.Rn ≈ flux.H + flux.LE + flux.G_soil + flux.G_snow
   @test flux.H ≈ 44.300771742675465

@@ -15,8 +15,9 @@ argument. The Julia function `func` evaluates func.
 # INPUTS
 - `args...`: other arguments to be passed to `func`
 """
-function root_brent(func, args...; lb, ub, tol=0.01, itmax=50, kw...)
+function root_brent(func, args...; lb, ub, tol=0.01, eps=1e-8, itmax = 50, kw...)
   # --- Evaluate func at xa and xb and make sure the root is bracketed
+  
   a, b = lb, ub
   fa = func(a, args...; kw...)
   fb = func(b, args...; kw...)
@@ -24,9 +25,8 @@ function root_brent(func, args...; lb, ub, tol=0.01, itmax=50, kw...)
   if ((fa > 0 && fb > 0) || (fa < 0 && fb < 0))
     error("root_brent error: root must be bracketed")
   end
-
-  eps1 = 1e-08    # Relative error tolerance
-
+  
+  # Relative error tolerance
   c, fc = b, fb
   d = 0.0
   e = 0.0
@@ -38,10 +38,14 @@ function root_brent(func, args...; lb, ub, tol=0.01, itmax=50, kw...)
       e = d
     end
     if (abs(fc) < abs(fb))
-      a, b, c = b, c, a
-      fa, fb, fc = fb, fc, fa
+      a = b
+      b = c
+      c = a
+      fa = fb
+      fb = fc
+      fc = fa
     end
-    tol1 = 2 * eps1 * abs(b) + 0.5 * tol
+    tol1 = 2 * eps * abs(b) + 0.5 * tol
     xm = 0.5 * (c - b)
 
     # Check to end iteration
@@ -80,6 +84,7 @@ function root_brent(func, args...; lb, ub, tol=0.01, itmax=50, kw...)
     else
       b = xm >= 0 ? b + abs(tol1) : b - abs(tol1)
     end
+
     fb = func(b, args...; kw...)
     fb == 0 && break # Check to end iteration
 
