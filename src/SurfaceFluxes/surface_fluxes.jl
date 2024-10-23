@@ -16,7 +16,7 @@ function surface_fluxes!(flux::Flux, met::Met, rad::Radiation, can::Canopy, soil
   (; θ, e, Pa, ρ_mol, cpₐ) = met
   (; ϵ, Qa) = rad
   (; gc) = can
-  (; θ_surf, e_surf, g_ac, u₊, θ₊) = flux
+  (; θ_surf, g_ac, u₊, θ₊) = flux
   (; Tsoil) = soil
 
   # Aerodynamic conductances for momentum (gam) and scalars (g_ac) (mol/m2/s)
