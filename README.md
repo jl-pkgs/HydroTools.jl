@@ -15,14 +15,23 @@
 
 ## Contents
 
-- Meteorological basics  
-  - Humidity
-  - Radiation
+- [x] 水汽转换函数：VPD, ea, es, q, RH
+- [x] 极端降水指标、热浪指标、体感温度
+- [x] 潜在蒸散发
+- [x] 冠层辐射传输（n层）
+- [x] 土壤水运动
+- [x] 土壤热通量
+- [x] 蒸散发与土壤热通量联合求解
 
-- Potential Evapotranspiration models
+- [x] 优化函数sceua
 
-- Extreme Climate indexes
-  - Heatwave index
+## TODO
+
+温度求解存在较大误差，不确定误差来源`辐射`还是`参数`。
+
+- [ ] 尝试采用ODE的方法解土壤温度
+
+- [ ] 已知温度，反推`κ`, `cv`
 
 ## References
 

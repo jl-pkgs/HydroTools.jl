@@ -8,8 +8,8 @@
 ```
 
 # Return
- - `κ`: Thermal conductivity, [W/m/K]
- - `cv`: Heat capacity of soil solids, [J/m3/K]
+ - `κ`  : Thermal conductivity, [W/m/K]
+ - `cv` : Heat capacity of soil solids, [J/m3/K]
 """
 function soil_thermal_properties!(κ, cv,
   Tsoil, SM_liq, SM_ice, dz;
