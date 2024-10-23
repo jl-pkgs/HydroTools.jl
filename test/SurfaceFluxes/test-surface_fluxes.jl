@@ -46,7 +46,9 @@ begin
   flux = Flux{Float64}(; θ_surf=Ts, e_surf=es) # 生成一次即可
 
   ## Radiation and Canopy
-  rad = Radiation(day, hour, lat; Rln_in=cal_Rln_in(Ta))
+  rad = Radiation()
+  update_rad!(rad, day, hour, lat, Ta)
+  # rad = Radiation(day, hour, lat; Rln_in=_cal_Rli(Ta))
 
   coszen = cal_coszen(day, hour, lat)
   can = Canopy{Float64}(; LAI=5.0, coszen)

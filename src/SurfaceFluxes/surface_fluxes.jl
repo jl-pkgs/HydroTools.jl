@@ -70,6 +70,7 @@ function surface_fluxes!(flux::Flux, met::Met, rad::Radiation, can::Canopy, soil
     error("Energy unbalance in surface_fluxes")
   end
   @pack! flux = g_ac, Qa, LWout, Rn, LE, H, G_soil, G_snow
+
   flux.θ_surf = Tsoil_next[1]
   Tsoil .= Tsoil_next
   flux

@@ -37,20 +37,19 @@ function Soil(dz; dt=1800, kw...)
 end
 
 
-function init_soil!(soil::Soil; Ts=25.0, soil_texture::Int=5)
+function init_soil!(soil::Soil; Ts=25.0, soil_texture::Int=5, satfrac=0.85)
   (; n, κ, cv, Tsoil, SM_liq, SM_ice, dz) = soil
   ρ_wat = 1000.0          # Density of water (kg/m3)
+  isa(Ts, Number) && (Ts = fill(Ts, n))
   
   # Initial soil temperature (K) and unfrozen and frozen water (kg H2O/m2)
   for i in 1:n
-    Tsoil[i] = Ts + K0 # Temperature
+    Tsoil[i] = Ts[i] + K0 # Temperature
     # Soil water at saturation (kg H2O/m2)
     SM_sat = Θ_S[soil_texture] * ρ_wat * dz[i]
-
     # Actual water content is some fraction of saturation. These are only used for soil
     # thermal properties and phase change. Note the inconsistency with the use of soil
     # water in the bucket model to calculate the soil wetness factor.
-    satfrac = 0.85
     if Tsoil[i] > K0
       SM_ice[i] = 0
       SM_liq[i] = satfrac * SM_sat
@@ -59,7 +58,6 @@ function init_soil!(soil::Soil; Ts=25.0, soil_texture::Int=5)
       SM_liq[i] = 0
     end
   end
-
   soil_thermal_properties!(κ, cv, Tsoil, SM_liq, SM_ice, dz; soil_texture)
   soil
 end

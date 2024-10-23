@@ -43,7 +43,7 @@ end
 
 # Arguments
 - `e`  : Vapor pressure (Pa)
-- `Pa` : Air pressure (Pa)
+- `Pa` : Air pressure (Pa)，用于计算q, ρ_mol, ρₐ，影响应该不大
 
 # Return
 Meteorological variables at reference height z:

@@ -25,8 +25,11 @@ begin
   Pa = atm * 1e3
   es, d_es = satvap(Ta) # Pa
   ea = es * RH / 100
-  z = 30.0
-  met = Met(Ta, ea, Pa, z; rain=0, snow=0, u=3.0)
+
+  snow, rain = 0.0, 0.0
+  u = 3.0
+  met = Met(; z=30.0)
+  update_met!(met, Ta, ea, u, rain, snow, Pa)
 
   ## Flux
   Ts = Tmean + K0
@@ -35,7 +38,7 @@ begin
 end
 
 @testset "MOST" begin
-  @test _MOST(flux, met, 10.0; param...) ≈ -10.745758995719331  
+  @test _MOST(flux, met, 10.0; param...) ≈ -10.745758995719331
 
   most(x) = _MOST(flux, met, x; param...)
   ζ1 = root_hybrid(most; tol=0.01, lb=-100.0, ub=100.0) # 100.98195098560592

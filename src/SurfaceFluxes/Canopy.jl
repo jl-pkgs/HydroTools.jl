@@ -23,3 +23,21 @@ coszen = cal_coszen(doy, hour, lat)
   "canopy conductance (mol/m2/s)"
   gc::T = coszen > 0.0 ? (fsun * gc_max + (1 - fsun) * gc_min) * LAI : gc_min * LAI # 冠层整体的导度
 end
+
+function update_canopy!(can::Canopy{T}, LAI::T, coszen::T) where {T<:Real}
+  (; kQ) = can
+  fsun = (1 - exp(-kQ * LAI)) / (kQ * LAI)
+  gc = coszen > 0.0 ? (fsun * gc_max + (1 - fsun) * gc_min) * LAI : gc_min * LAI
+  @pack! can = LAI, coszen, fsun, gc
+  can
+end
+
+function update_canopy!(can::Canopy{T}, coszen::T) where {T<:Real}
+  (; fsun, LAI) = can
+  gc = coszen > 0.0 ? (fsun * gc_max + (1 - fsun) * gc_min) * LAI : gc_min * LAI
+  @pack! can = coszen, gc
+  can
+end
+
+
+export Canopy, update_canopy!

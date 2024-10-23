@@ -39,3 +39,6 @@ streamlit
 temp
 *.png
 scripts/ET
+
+examples
+backup
