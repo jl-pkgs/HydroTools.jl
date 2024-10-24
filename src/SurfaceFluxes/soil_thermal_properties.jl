@@ -22,13 +22,13 @@ function soil_thermal_properties!(κ, cv,
   cv_sol = 1.926 * 1e6 # Heat capacity of soil solids (J/m3/K)
 
   for i in 1:nsoil
-    Θ_liq = SM_liq[i] / (ρ_wat * dz[i])  # [kg m-2] to [m3 m-3]
-    Θ_ice = SM_ice[i] / (ρ_ice * dz[i])  # 
-    fliq = Θ_liq / (Θ_liq + Θ_ice)       # Fraction of liq
-    s = min((Θ_liq + Θ_ice) / Θ_S[k], 1) # Soil water relative to saturation
+    θ_liq = SM_liq[i] / (ρ_wat * dz[i])  # [kg m-2] to [m3 m-3]
+    θ_ice = SM_ice[i] / (ρ_ice * dz[i])  # 
+    fliq = θ_liq / (θ_liq + θ_ice)       # Fraction of liq
+    s = min((θ_liq + θ_ice) / θ_S[k], 1) # Soil water relative to saturation
 
     # Dry thermal conductivity (W/m/K) from bulk density (kg/m3)
-    bulk = 2700 * (1 - Θ_S[k])
+    bulk = 2700 * (1 - θ_S[k])
     tk_dry = (0.135 * bulk + 64.7) / (2700 - 0.947 * bulk)
 
     # Thermal conductivity of quartz and soil solids (W/m/K)
@@ -38,11 +38,11 @@ function soil_thermal_properties!(κ, cv,
     tk_sol = tk_quartz^quartz * tko^(1 - quartz)
 
     # Saturated thermal conductivity (W/m/K) and unfrozen and frozen values
-    tksat = tk_sol^(1 - Θ_S[k]) *
-            tk_wat^(fliq * Θ_S[k]) *
-            tk_ice^(Θ_S[k] - fliq * Θ_S[k])
-    tksat_u = tk_sol^(1 - Θ_S[k]) * tk_wat^Θ_S[k]
-    tksat_f = tk_sol^(1 - Θ_S[k]) * tk_ice^Θ_S[k]
+    tksat = tk_sol^(1 - θ_S[k]) *
+            tk_wat^(fliq * θ_S[k]) *
+            tk_ice^(θ_S[k] - fliq * θ_S[k])
+    tksat_u = tk_sol^(1 - θ_S[k]) * tk_wat^θ_S[k]
+    tksat_f = tk_sol^(1 - θ_S[k]) * tk_ice^θ_S[k]
 
     # Kersten number and unfrozen and frozen values
     if SAND[k] < 50
@@ -59,9 +59,9 @@ function soil_thermal_properties!(κ, cv,
     κf = (tksat_f - tk_dry) * ke_f + tk_dry
 
     # Heat capacity (J/m3/K) and unfrozen and frozen values
-    cv[i] = (1 - Θ_S[k]) * cv_sol + cv_wat * Θ_liq + cv_ice * Θ_ice
-    cvu = (1 - Θ_S[k]) * cv_sol + cv_wat * (Θ_liq + Θ_ice)
-    cvf = (1 - Θ_S[k]) * cv_sol + cv_ice * (Θ_liq + Θ_ice)
+    cv[i] = (1 - θ_S[k]) * cv_sol + cv_wat * θ_liq + cv_ice * θ_ice
+    cvu = (1 - θ_S[k]) * cv_sol + cv_wat * (θ_liq + θ_ice)
+    cvf = (1 - θ_S[k]) * cv_sol + cv_ice * (θ_liq + θ_ice)
 
     # Adjust heat capacity and thermal conductivity if using apparent heat capacity
     if method == "apparent-heat-capacity"
@@ -69,7 +69,7 @@ function soil_thermal_properties!(κ, cv,
 
       if -tinc <= Tsoil[i] - TFRZ <= tinc
         # Heat of fusion (J/m3) - This is equivalent to ql = λ_fus * (mm_liq + mm_ice) / dz
-        ql = λ_fus * (ρ_wat * Θ_liq + ρ_ice * Θ_ice)
+        ql = λ_fus * (ρ_wat * θ_liq + ρ_ice * θ_ice)
         cv[i] = (cvf + cvu) / 2 + ql / (2 * tinc)
         κ[i] = κf + (κu - κf) * (Tsoil[i] - TFRZ + tinc) / (2 * tinc)
       elseif Tsoil[i] - TFRZ > tinc # unfrozen

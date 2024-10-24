@@ -11,25 +11,25 @@ export matric_potential, HydraulicConductivity
 # !deprecated
 function HydraulicConductivity(ψ::AbstractVector; param, fun=van_Genuchten)
   n = length(ψ)
-  Θ = zeros(n)
+  θ = zeros(n)
   K = zeros(n)
-  ∂Θ∂ψ = zeros(n)
+  ∂θ∂ψ = zeros(n)
   for i in 1:n
-    Θ[i], K[i], ∂Θ∂ψ[i] = fun(ψ[i]; param)
+    θ[i], K[i], ∂θ∂ψ[i] = fun(ψ[i]; param)
   end
-  Θ, K, ∂Θ∂ψ
+  θ, K, ∂θ∂ψ
 end
 
 
-# Calculate ψ for a given Θ
-function matric_potential(Θ, param; method="van_Genuchten")
+# Calculate ψ for a given θ
+function matric_potential(θ, param; method="van_Genuchten")
   if method == "van_Genuchten"
-    @unpack Θ_res, Θ_sat, α, n, m = param
-    Se = @. (Θ - Θ_res) / (Θ_sat - Θ_res)
+    @unpack θ_res, θ_sat, α, n, m = param
+    Se = @. (θ - θ_res) / (θ_sat - θ_res)
     ψ = @. -((Se^(-1 / m) - 1)^(1 / n)) / α
   elseif method == "Campbell"
-    @unpack ψ_sat, Θ_sat, b = param
-    ψ = @. ψ_sat * (Θ / Θ_sat)^-b
+    @unpack ψ_sat, θ_sat, b = param
+    ψ = @. ψ_sat * (θ / θ_sat)^-b
   end
   ψ
 end

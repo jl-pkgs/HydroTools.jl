@@ -43,7 +43,7 @@ end
   dz = fill(0.025, n)
   z, z₊ₕ, dz₊ₕ = soil_depth_init(dz)
 
-  m_sat = Θ_S[k] * ρ_wat * dz # kg/m2
+  m_sat = θ_S[k] * ρ_wat * dz # kg/m2
   m_ice = 0 * m_sat
   m_liq = 0.8 * m_sat
 

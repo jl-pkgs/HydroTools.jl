@@ -1,4 +1,4 @@
-export ρ_wat, ρ_ice, SILT, SAND, CLAY, Θ_S
+export ρ_wat, ρ_ice, SILT, SAND, CLAY, θ_S
 
 
 ρ_wat = 1000.0                       # Density of water (kg/m3)
@@ -34,7 +34,7 @@ CLAY = [3.0, 6.0, 10.0, 13.0, 18.0, 27.0, 34.0, 34.0, 42.0, 47.0, 58.0] # Percen
 
 # Volumetric soil water content (%) at saturation (porosity)
 # (Clapp and Hornberger. 1978. Water Resources Research 14:601-604)
-Θ_S = [0.395, 0.410, 0.435, 0.485, 0.451, 0.420, 0.477, 0.476, 0.426, 0.492, 0.482]
+θ_S = [0.395, 0.410, 0.435, 0.485, 0.451, 0.420, 0.477, 0.476, 0.426, 0.492, 0.482]
 
 
 # 饱和质量

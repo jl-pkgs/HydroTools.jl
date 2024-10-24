@@ -46,7 +46,7 @@ function init_soil!(soil::Soil; Ts=25.0, soil_texture::Int=5, satfrac=0.85)
   for i in 1:n
     Tsoil[i] = Ts[i] + K0 # Temperature
     # Soil water at saturation (kg H2O/m2)
-    SM_sat = Θ_S[soil_texture] * ρ_wat * dz[i]
+    SM_sat = θ_S[soil_texture] * ρ_wat * dz[i]
     # Actual water content is some fraction of saturation. These are only used for soil
     # thermal properties and phase change. Note the inconsistency with the use of soil
     # water in the bucket model to calculate the soil wetness factor.

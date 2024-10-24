@@ -9,9 +9,9 @@ using HydroTools, Test
 end
 
 @testset "Cambell" begin
-  param = (Θ_sat=0.25, ψ_sat=-25.0, b=0.2, K_sat=3.4e-03)
-  Θ, K, ∂Θ∂ψ = Cambell(-100; param)
-  @test (Θ, K, ∂Θ∂ψ) == (0.000244140625, 1.979060471057893e-13, 1.220703125e-5)
+  param = (θ_sat=0.25, ψ_sat=-25.0, b=0.2, K_sat=3.4e-03)
+  θ, K, ∂θ∂ψ = Cambell(-100; param)
+  @test (θ, K, ∂θ∂ψ) == (0.000244140625, 1.979060471057893e-13, 1.220703125e-5)
 end
 
 @testset "soil_moisture!" begin
@@ -21,14 +21,14 @@ end
 
   soil_texture = 1
   param = (soil_texture=1,
-    Θ_res=0.075, Θ_sat=0.287,
+    θ_res=0.075, θ_sat=0.287,
     α=0.027, n=3.96, m=1, K_sat=34 / 3600)
 
-  Θ = fill(0.1, n)
-  ψ = matric_potential(Θ, param; method="van_Genuchten")
+  θ = fill(0.1, n)
+  ψ = matric_potential(θ, param; method="van_Genuchten")
 
-  Θ0 = 0.267
-  ψ0 = matric_potential(Θ0, param; method="van_Genuchten")
+  θ0 = 0.267
+  ψ0 = matric_potential(θ0, param; method="van_Genuchten")
 
   dt = 5
   ntim = 0.8 * 3600 / dt
@@ -44,7 +44,7 @@ end
     # @printf("hour = %8.3f\n", hour)
     
     # Calculate soil moisture
-    Q0, QN, dθ, err = soil_moisture!(Θ, ψ, ψ0, dz, dt, param)
+    Q0, QN, dθ, err = soil_moisture!(θ, ψ, ψ0, dz, dt, param)
 
     # % Sum fluxes for relative mass balance error
     sum_in += abs(Q0) * dt

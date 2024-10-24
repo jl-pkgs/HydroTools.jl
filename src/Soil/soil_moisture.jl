@@ -35,7 +35,7 @@ export soil_moisture!
 
 # Example
 ```julia
-soil_moisture!(Θ, ψ, ψ0, dz, dt, param)
+soil_moisture!(θ, ψ, ψ0, dz, dt, param)
 ```
 """
 function soil_moisture!(θ, ψ, ψ0, dz, dt, param; sink=nothing, Q0=nothing, fun=van_Genuchten)

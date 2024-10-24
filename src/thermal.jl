@@ -123,9 +123,9 @@ function theta_wet(P0, T0, Td)
   Lv = cal_lambda(T_lcl)
   w = Tdew2w(Td, P0 / 10) # w守恒
 
-  Θ = adiabat_dry_T(P0, T0 + K0, 1000.0, w) # hPa
-  Θ_se = Θ * exp(Lv * w / (Cp * K_lcl))
-  (T_lcl, Θ=Θ - K0, Θ_se=Θ_se - K0)
+  θ = adiabat_dry_T(P0, T0 + K0, 1000.0, w) # hPa
+  θ_se = θ * exp(Lv * w / (Cp * K_lcl))
+  (T_lcl, θ=θ - K0, θ_se=θ_se - K0)
 end
 
 
@@ -138,8 +138,8 @@ function theta_wet_bolton(P0, T0, Td)
   t_l = 56 + 1 / (1 / (td - 56) + log(tk / td) / 800)
 
   th_l = theta(P0 - ea, tk) * (tk / t_l)^(0.28 * r)
-  Θ_se = th_l * exp(r * (1 + 0.448 * r) * (3036 / t_l - 1.78))
-  (; T_lcl=t_l - K0, Θ_se=Θ_se - K0)
+  θ_se = th_l * exp(r * (1 + 0.448 * r) * (3036 / t_l - 1.78))
+  (; T_lcl=t_l - K0, θ_se=θ_se - K0)
 end
 
 

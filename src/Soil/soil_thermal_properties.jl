@@ -26,7 +26,7 @@ function soil_thermal_properties(dz::AbstractVector, Tsoil::AbstractVector,
 
   # Volumetric soil water content (%) at saturation (porosity)
   # (Clapp and Hornberger. 1978. Water Resources Research 14:601-604)
-  Θ_S = [0.395, 0.410, 0.435, 0.485, 0.451, 0.420, 0.477, 0.476, 0.426, 0.492, 0.482]
+  θ_S = [0.395, 0.410, 0.435, 0.485, 0.451, 0.420, 0.477, 0.476, 0.426, 0.492, 0.482]
   
   _c_wat = 4188.0                         # Specific heat of water (J/kg/K)
   _c_ice = 2117.27                        # Specific heat of ice (J/kg/K)
@@ -48,18 +48,18 @@ function soil_thermal_properties(dz::AbstractVector, Tsoil::AbstractVector,
   k = soil_texture
   @fastmath @inbounds for i = 1:n
     # --- Volumetric soil water and ice
-    Θ_liq = m_liq[i] / (ρ_wat * dz[i])
-    Θ_ice = m_ice[i] / (ρ_ice * dz[i])
+    θ_liq = m_liq[i] / (ρ_wat * dz[i])
+    θ_ice = m_ice[i] / (ρ_ice * dz[i])
 
     # Fraction of total volume that is liquid water
-    fᵤ = Θ_liq / (Θ_liq + Θ_ice)
+    fᵤ = θ_liq / (θ_liq + θ_ice)
 
     # --- Dry thermal conductivity (W/m/K) from 
-    ρ_b = 2700 * (1 - Θ_S[k]) # density of soil soliads, bulk density (kg/m3)
+    ρ_b = 2700 * (1 - θ_S[k]) # density of soil soliads, bulk density (kg/m3)
     κ_dry = (0.135 * ρ_b + 64.7) / (2700 - 0.947 * ρ_b)  # Eq. 5.27
 
     # --- Kersten number and unfrozen and frozen values
-    S_e = min((Θ_liq + Θ_ice) / Θ_S[k], 1) # Soil water relative to saturation
+    S_e = min((θ_liq + θ_ice) / θ_S[k], 1) # Soil water relative to saturation
     Ke_f = S_e
 
     if (SAND[k] < 50)
@@ -78,10 +78,10 @@ function soil_thermal_properties(dz::AbstractVector, Tsoil::AbstractVector,
     κ_sol = κ_q^q * κ_o^(1 - q)  # Eq. 5.31
 
     # --- Saturated thermal conductivity (W/m/K) and unfrozen and frozen values
-    κ_sat = κ_sol^(1 - Θ_S[k]) * κ_wat^(fᵤ * Θ_S[k]) * κ_ice^((1 - fᵤ) * Θ_S[k]) # Eq. 5.30
+    κ_sat = κ_sol^(1 - θ_S[k]) * κ_wat^(fᵤ * θ_S[k]) * κ_ice^((1 - fᵤ) * θ_S[k]) # Eq. 5.30
 
-    κ_sat_u = κ_sol^(1 - Θ_S[k]) * κ_wat^Θ_S[k] # Eq. 5.28
-    κ_sat_f = κ_sol^(1 - Θ_S[k]) * κ_ice^Θ_S[k] # Eq. 5.29
+    κ_sat_u = κ_sol^(1 - θ_S[k]) * κ_wat^θ_S[k] # Eq. 5.28
+    κ_sat_f = κ_sol^(1 - θ_S[k]) * κ_ice^θ_S[k] # Eq. 5.29
 
     # --- Thermal conductivity (W/m/K) and unfrozen and frozen values
     κ[i] = (κ_sat - κ_dry) * Ke + κ_dry
@@ -93,10 +93,10 @@ function soil_thermal_properties(dz::AbstractVector, Tsoil::AbstractVector,
     cv_sol = 1.926e6
 
     # --- Heat capacity (J/m3/K) and unfrozen and frozen values
-    cv[i] = (1 - Θ_S[k]) * cv_sol + cv_wat * Θ_liq + cv_ice * Θ_ice # Eq. 5.32
+    cv[i] = (1 - θ_S[k]) * cv_sol + cv_wat * θ_liq + cv_ice * θ_ice # Eq. 5.32
 
-    cv_u = (1 - Θ_S[k]) * cv_sol + cv_wat * (Θ_liq + Θ_ice)
-    cv_f = (1 - Θ_S[k]) * cv_sol + cv_ice * (Θ_liq + Θ_ice)
+    cv_u = (1 - θ_S[k]) * cv_sol + cv_wat * (θ_liq + θ_ice)
+    cv_f = (1 - θ_S[k]) * cv_sol + cv_ice * (θ_liq + θ_ice)
 
     # --- Adjust heat capacity and thermal conductivity if using apparent heat capacity
     if method == "apparent-heat-capacity"
@@ -104,7 +104,7 @@ function soil_thermal_properties(dz::AbstractVector, Tsoil::AbstractVector,
       tinc = 0.5 # Temperature range for freezing and thawing [k]
       # Heat of fusion (J/m3), equivalent to 
       # ql = λ_fus * (m_liq + m_ice) / dz
-      ql = λ_fus * (ρ_wat * Θ_liq + ρ_ice * Θ_ice)
+      ql = λ_fus * (ρ_wat * θ_liq + ρ_ice * θ_ice)
 
       # Heat capacity and thermal conductivity, Eq. 5.39
       if Tsoil[i] > tfrz + tinc

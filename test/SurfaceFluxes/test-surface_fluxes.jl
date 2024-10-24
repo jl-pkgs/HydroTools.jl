@@ -2,8 +2,8 @@ using HydroTools, Test
 using HydroTools.SurfaceFluxes
 
 function cal_Rln_in(Ta::Real)
-  Θ = Ta + K0
-  return (0.398e-05 * Θ^2.148) * σ * Θ^4 # 注意这里是气温，用气温推算的Rln_in
+  θ = Ta + K0
+  return (0.398e-05 * θ^2.148) * σ * θ^4 # 注意这里是气温，用气温推算的Rln_in
 end
 
 

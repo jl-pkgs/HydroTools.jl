@@ -57,8 +57,8 @@ end
 
 # bonan 2019, 案例
 function _cal_Rli(Ta::Real)
-  Θ = Ta + K0
-  return (0.398e-05 * Θ^2.148) * σ * Θ^4 # 注意这里是气温，用气温推算的Rln_in
+  θ = Ta + K0
+  return (0.398e-05 * θ^2.148) * σ * θ^4 # 注意这里是气温，用气温推算的Rln_in
 end
 
 """
