@@ -1,3 +1,5 @@
+import HydroTools.SurfaceFluxes: θ_S
+
 @testset "soil" begin
   dz = [0.1, 0.2, 0.3]
   z, z₊ₕ, dz₊ₕ = soil_depth_init(dz)

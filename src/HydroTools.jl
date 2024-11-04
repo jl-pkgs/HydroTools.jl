@@ -20,7 +20,7 @@ include("thermal.jl")
 include("PET/PET.jl")
 include("unit_convert.jl")
 include("Radiation/Radiation.jl")
-include("Soil/Soil.jl")
+# include("Soil/Soil.jl")
 include("SurfaceFluxes/SurfaceFluxes.jl")
 
 include("Met/Met.jl")

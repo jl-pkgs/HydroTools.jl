@@ -1,4 +1,3 @@
-
 """
     sceua(fn::Function, x0::Vector, bl::Vector, bu::Vector;
         maxn=500, kstop=5, pcento=0.01, peps=0.001, ngs=5, iseed=-1, iniflg=1)
@@ -141,11 +140,8 @@ function sceua(fn::Function, x0::Vector{FT}, bl::Vector{FT}, bu::Vector{FT};
   # Check for convergency
   if icall >= maxn
     disp("*** OPTIMIZATION SEARCH TERMINATED BECAUSE THE LIMIT")
-    disp("ON THE MAXIMUM NUMBER OF TRIALS ")
-    disp(maxn)
-    disp("HAS BEEN EXCEEDED.  SEARCH WAS STOPPED AT TRIAL NUMBER:")
-    disp(icall)
-    disp("OF THE INITIAL LOOP!")
+    disp("ON THE MAXIMUM NUMBER OF TRIALS $maxn HAS BEEN EXCEEDED.")
+    println("SEARCH WAS STOPPED AT TRIAL NUMBER: $icall OF THE INITIAL LOOP!")
   end
 
   if gnrng .< peps

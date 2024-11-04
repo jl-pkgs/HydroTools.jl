@@ -35,33 +35,3 @@ function soil_depth_init(dz::AbstractVector)
 
   (; z, z₊ₕ, dz₊ₕ)
 end
-
-
-# "face to center"
-# function C2F(z::AbstractVector)
-#   n = length(z) 
-#   z₊ₕ = zeros(n)
-#   d = zeros(n)
-
-#   z₊ₕ[1] = z[1]*2
-#   d[1] = z[1]*2
-
-#   @inbounds for i = 2:n
-#     d[i] = 2(z[i] - z[i-1]) - d[i-1]
-#     z₊ₕ[i] = z₊ₕ[i-1] + d[i]
-#   end
-#   z₊ₕ
-# end
-
-# "center to face"
-# function F2C(z₊ₕ::AbstractVector)
-#   n = length(z₊ₕ) 
-#   z = zeros(n)
-#   z[1] = z₊ₕ[1]/2
-#   @inbounds for i = 2:n
-#     z[i] = 0.5 * (z₊ₕ[i] + z₊ₕ[i-1])
-#   end
-#   z
-# end
-
-# export C2F, F2C

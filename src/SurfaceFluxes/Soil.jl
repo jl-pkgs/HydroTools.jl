@@ -58,7 +58,7 @@ function init_soil!(soil::Soil; Ts=25.0, soil_texture::Int=5, satfrac=0.85)
       SM_liq[i] = 0
     end
   end
-  soil_thermal_properties!(κ, cv, Tsoil, SM_liq, SM_ice, dz; soil_texture)
+  soil_thermal_properties_flux(κ, cv, Tsoil, SM_liq, SM_ice, dz; soil_texture)
   soil
 end
 
