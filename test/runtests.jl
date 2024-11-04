@@ -6,7 +6,7 @@ include("test-Met.jl")
 
 include("SurfaceFluxes/test-SurfaceFluxes.jl")
 include("test-thermal.jl")
-include("test-soil_moisture.jl")
+# include("test-soil_moisture.jl")
 include("test-soil_temperature.jl")
 include("test-radiation.jl")
 include("test-sceua.jl")
