@@ -143,6 +143,7 @@ function theta_wet_bolton(P0, T0, Td)
 end
 
 
-export theta, theta_se, LCL, LCL_bolton,
+# export theta, 
+export theta_se, LCL, LCL_bolton,
   adiabat_dry_T, adiabat_dry_P,
   theta_wet, theta_wet_bolton
