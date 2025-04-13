@@ -1,7 +1,7 @@
 name = "HydroTools"
 uuid = "179359cd-bac3-4aa1-bccd-287172463ab0"
 authors = ["Dongdong Kong <kongdd@users.noreply.github.com>"]
-version = "0.1.7"
+version = "0.1.8"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
@@ -18,12 +18,12 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 
 [compat]
-DataFrames = "1.6"
+DataFrames = "1.6, 1.7"
 DataStructures = "0.18, 0.19"
 DocStringExtensions = "0.9"
 FieldMetadata = "0.3"
 Parameters = "0.12"
 Reexport = "1"
-Statistics = "1.9, 1.10"
+Statistics = "1.9, 1.10, 1.11"
 UnPack = "1.0"
-julia = "1.9, 1.10"
+julia = "1.9, 1.10, 1.11"
