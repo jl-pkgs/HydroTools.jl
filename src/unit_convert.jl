@@ -38,12 +38,12 @@ W2mm(Ra; λ) = Ra * 86400 / 1_000_000 / λ
     mol2m(Tavg, Pa=atm)
     mol2m_rong2018(Tavg, Pa=atm)
 
-Convert from mol m-2 s-1 to m s-1, g = g_m * mol2m(Tavg)
+Convert from mol [m-2 s-1] to [m s-1], `g = g_m * mol2m(Tavg)`
 
 # Reference
 1. Monteith, 2013, Principles of Environmental Physics, Eq. 3.14
 """
-mol2m(Tavg, Pa=atm) = R * (Tavg + K0) / Pa / 1000
+mol2m(Tavg, Pa=atm) = R * (Tavg + K0) / (Pa * 1000)
 
 mol2m_rong2018(Tavg, Pa=atm) = 1e-2 / (0.446 * (273 / (273 + Tavg)) * (Pa / 101.3))
 
@@ -67,4 +67,6 @@ rad2deg(rad::Real) = rad / π * 180.0
 
 
 export R2Q, Q2R, MJ2W, MJ2mm, W2MJ, W2mm, F2C, C2F, K2C, C2K
+export mol2m, mol2m_rong2018
 # deg2rad, rad2deg
+
