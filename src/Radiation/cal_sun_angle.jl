@@ -16,15 +16,15 @@ end
 
 
 """
-    SolarDeclinationAngle(J; to_deg=false)
+    angle_SolarDeclination(J; to_deg=false)
 
 # Arguments
 - σ: Solar Declination Angle, 黄赤交角（太阳赤纬角）
 - ϕ: `纬度`
 - ω: `时角`
 """
-function SolarDeclinationAngle(J::Integer; deg=false)
-  σ = 0.409 * sin(2 * pi / 365 * J .- 1.39) # Allen, Eq. 24
+function angle_SolarDeclination(J::Integer; deg=false)
+  σ = 0.409 * sin(2pi / 365 * J .- 1.39) # Allen, Eq. 24
   deg ? rad2deg(σ) : σ
 end
 
@@ -42,7 +42,7 @@ Calculate the sunset hour angle.
 """
 @fastmath function HourAngleSunSet(lat=0, J::Integer=1; deg=false)
   lat = deg2rad(lat)
-  σ = SolarDeclinationAngle(J)
+  σ = angle_SolarDeclination(J)
 
   tmp = clamp(-tan(lat) * tan(σ), -1, 1)
   ws = acos(tmp) # Eq. 25
@@ -55,4 +55,21 @@ function SunshineDuration(lat=0, J::Integer=1)
   w_hour * 2 # ssh
 end
 
-export HourAngleSunSet, SunshineDuration, ssh2time
+
+"""
+任一点，任一时刻的太阳高度角
+"""
+function angle_SunElevation(lat::Real, time_local::DateTime)
+  ψ = deg2rad(lat)  # 纬度转弧度
+  J = dayofyear(time_local)
+  σ = angle_SolarDeclination(J; deg=false)
+  dh = hour(time_local) + minute(time_local) / 60 - 12.0
+  ω = deg2rad(dh * 15) # 时角，上午为负，下午为正
+  # @show ψ, J, σ, ω
+  sinH = cos(ψ) * cos(σ) * cos(ω) + sin(ψ) * sin(σ)
+  return asin(sinH)
+end
+
+
+export HourAngleSunSet, SunshineDuration, ssh2time,
+  angle_SunElevation
