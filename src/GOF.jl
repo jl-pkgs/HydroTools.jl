@@ -63,6 +63,17 @@ function of_NSE_multi(obs, sim; min=0.01)
   of_NSE(obs, sim) + of_NSE(1.0 ./ obs, 1.0 ./ sim)
 end
 
+function of_MAE(obs, sim)
+  obs, sim = valid_index(obs, sim)
+  length(sim) <= 2 && (return -999.0)
+  mean(abs.(sim .- obs))        # Mean Absolute Error
+end
+
+function of_RMSE(obs, sim)
+  obs, sim = valid_index(obs, sim)
+  length(sim) <= 2 && (return -999.0)
+  sqrt(mean((sim .- obs) .^ 2)) # Root Mean Square Error
+end
 
 function GOF(obs::AbstractVector{T}, sim::AbstractVector{T}) where {T<:Real}
   obs, sim = valid_index(obs, sim)
@@ -92,3 +103,4 @@ end
 
 export of_NSE, of_KGE, of_NSE_multi, of_KGE_multi, 
   GOF, valid_index
+export of_MAE, of_RMSE
