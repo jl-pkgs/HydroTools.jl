@@ -74,11 +74,9 @@ function cal_Rsi_toa_inst(dates::Vector{DateTime}; lat=0)
   map(date -> begin
       J = dayofyear(date)
       r_v = 1 + 0.033 * cos(π * J / 182.5) # Allen, Eq. 23, r_v = (d_0/d)^2
-      sinh = angle_SunElevation(lat, date)
-      sinh = clamp(sinh, 0.0, 1.0)
-      # @show sinh
-      # @show sinh
-      Rg * r_v * sinh 
+      h = angle_SunElevation(lat, date)
+      sin_h = max(sin(h), 0.0)
+      Rg * r_v * sin_h
     end, dates)
 end
 
