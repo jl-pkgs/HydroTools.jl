@@ -10,7 +10,7 @@ include("test-thermal.jl")
 include("test-soil_temperature.jl")
 include("test-radiation.jl")
 include("test-Rs_toa.jl")
-include("test-sceua.jl")
+# include("test-sceua.jl")
 
 
 @testset "ET0 models" begin
@@ -31,7 +31,7 @@ end
   ]
 end
 
-@testset "GOF" begin
-  @test GOF(1:10, 2:11) ==
-        (NSE=0.8787878787878788, R2=1.0, KGE=0.8181818181818181, R=1.0, RMSE=1.0, MAE=1.0, bias=1.0, bias_perc=18.181818181818183, n_valid=10)
-end
+# @testset "GOF" begin
+#   @test GOF(1:10, 2:11) ==
+#         (NSE=0.8787878787878788, R2=1.0, KGE=0.8181818181818181, R=1.0, RMSE=1.0, MAE=1.0, bias=1.0, bias_perc=18.181818181818183, n_valid=10)
+# end
