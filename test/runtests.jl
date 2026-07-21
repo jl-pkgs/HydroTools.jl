@@ -10,6 +10,7 @@ include("test-thermal.jl")
 include("test-soil_temperature.jl")
 include("test-radiation.jl")
 include("test-Rs_toa.jl")
+include("test-ET0_hourly.jl")
 # include("test-sceua.jl")
 
 
