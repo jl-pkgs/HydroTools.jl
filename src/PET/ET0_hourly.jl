@@ -51,8 +51,8 @@ function ET0_FAO98(f::String)
   Tdew = nc_read(f, "dewpoint_temperature_2m") .- 273.15f0
   Ta = nc_read(f, "temperature_2m") .- 273.15f0
   Pa = nc_read(f, "surface_pressure") ./ 1000
-  H = nc_read(f, "surface_sensible_heat_flux") ./ Float32(1e6)
-  LE = nc_read(f, "surface_latent_heat_flux") ./ Float32(1e6)
+  H = nc_read(f, "surface_sensible_heat_flux_hourly") ./ Float32(1e6)
+  LE = nc_read(f, "surface_latent_heat_flux_hourly") ./ Float32(1e6)
   Rn_G = -(H + LE)
   clamp!(Rn_G, 0, Inf)
 
@@ -67,8 +67,8 @@ end
 function ET0_PriestleyTaylor1972(f::String)
   Ta = nc_read(f, "temperature_2m") .- 273.15f0
   Pa = nc_read(f, "surface_pressure") ./ 1000
-  H = nc_read(f, "surface_sensible_heat_flux") ./ Float32(1e6)
-  LE = nc_read(f, "surface_latent_heat_flux") ./ Float32(1e6)
+  H = nc_read(f, "surface_sensible_heat_flux_hourly") ./ Float32(1e6)
+  LE = nc_read(f, "surface_latent_heat_flux_hourly") ./ Float32(1e6)
   Rn_G = -(H + LE)
 
   _PT1972.(Rn_G, Ta, Pa)
@@ -77,7 +77,7 @@ end
 function ET0_Romanenko(f::String)
   Ta = nc_read(f, "temperature_2m") .- 273.15f0
   Tdew = nc_read(f, "dewpoint_temperature_2m") .- 273.15f0
-  _Romanenko.(Ta, Tdew)
+  _Romanenko.(Ta, Tdew) 
 end
 
 export ET0_FAO98, ET0_PriestleyTaylor1972, ET0_Romanenko
